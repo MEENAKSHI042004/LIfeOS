@@ -1,300 +1,2224 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LifeOS AI — Dashboard</title>
+<title>LifeOS AI — Life Operating System</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono&display=swap');
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #060d1a;
-    color: #e2e8f0;
-    min-height: 100vh;
-  }
+/* ═══════════════════════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
 
-  /* ── TOPBAR ── */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    background: #060d1a;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; color: #fff; }
-  .logo span { color: #38bdf8; }
-  .user-pill {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.05);
-    padding: 6px 14px 6px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: linear-gradient(135deg, #38bdf8, #818cf8);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600; color: #fff;
-  }
-  .user-pill span { font-size: 13px; color: #94a3b8; }
+:root{
+  --bg:        #07070f;
+  --bg1:       #0b0b18;
+  --bg2:       #0f1020;
+  --bg3:       #14152a;
+  --bg4:       #1a1b35;
+  --border:    rgba(255,255,255,0.055);
+  --border2:   rgba(255,255,255,0.10);
+  --border3:   rgba(255,255,255,0.16);
+  --text:      #e8e6f8;
+  --muted:     #6b6a90;
+  --dim:       #353455;
+  --purple:    #a29bfe;
+  --purple2:   #7c73f5;
+  --cyan:      #00d2ff;
+  --pink:      #fd79a8;
+  --green:     #00d2a0;
+  --amber:     #fdcb6e;
+  --red:       #f87171;
+  --blue:      #60a5fa;
+  --sidebar-w: 236px;
+  --topbar-h:  54px;
+}
 
-  /* ── LAYOUT ── */
-  .main { display: grid; grid-template-columns: 220px 1fr; height: calc(100vh - 57px); }
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow:hidden;
+}
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    padding: 20px 14px;
-    border-right: 1px solid rgba(255,255,255,0.06);
-    display: flex; flex-direction: column; gap: 4px;
-    overflow-y: auto;
-  }
-  .nav-section {
-    font-size: 10px; letter-spacing: 0.08em;
-    color: #334155; padding: 16px 12px 4px;
-    text-transform: uppercase;
-  }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; border-radius: 8px;
-    font-size: 13px; color: #64748b;
-    cursor: pointer; transition: all 0.15s;
-    text-decoration: none;
-  }
-  .nav-item:hover { background: rgba(255,255,255,0.04); color: #94a3b8; }
-  .nav-item.active { background: rgba(56,189,248,0.1); color: #38bdf8; }
-  .nav-item i { font-size: 16px; }
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:10px}
 
-  /* ── CONTENT ── */
-  .content {
-    padding: 28px;
-    overflow-y: auto;
-    display: flex; flex-direction: column; gap: 24px;
-  }
-  .page-title { font-size: 22px; font-weight: 600; color: #f1f5f9; letter-spacing: -0.4px; }
-  .page-sub { font-size: 13px; color: #475569; margin-top: 4px; }
+/* ══════════════════════════════════════
+   AMBIENT BACKGROUND
+══════════════════════════════════════ */
+.ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.amb-orb{
+  position:absolute;border-radius:50%;filter:blur(120px);opacity:0.06;
+  animation:drift 20s ease-in-out infinite alternate;
+}
+.amb-orb:nth-child(1){width:600px;height:600px;background:var(--purple);top:-200px;left:-100px;animation-delay:0s}
+.amb-orb:nth-child(2){width:400px;height:400px;background:var(--cyan);top:200px;right:-100px;animation-delay:-7s}
+.amb-orb:nth-child(3){width:500px;height:500px;background:var(--pink);bottom:-200px;left:30%;animation-delay:-14s}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.1)}}
 
-  /* ── SCORE CARDS ── */
-  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .score-card {
-    background: #0d1829;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 18px;
-    position: relative; overflow: hidden;
-  }
-  .score-card::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 2px; border-radius: 2px 2px 0 0;
-  }
-  .score-card.habit::before   { background: #38bdf8; }
-  .score-card.finance::before { background: #34d399; }
-  .score-card.goal::before    { background: #a78bfa; }
-  .score-card.overall::before { background: #fb923c; }
+/* ══════════════════════════════════════
+   SHELL LAYOUT
+══════════════════════════════════════ */
+.shell{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-columns:var(--sidebar-w) 1fr;
+  grid-template-rows:var(--topbar-h) 1fr;
+  height:100vh;
+}
 
-  .score-label {
-    font-size: 11px; color: #475569;
-    text-transform: uppercase; letter-spacing: 0.06em;
-    margin-bottom: 10px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .score-val { font-size: 30px; font-weight: 600; letter-spacing: -1px; line-height: 1; }
-  .score-card.habit   .score-val { color: #38bdf8; }
-  .score-card.finance .score-val { color: #34d399; }
-  .score-card.goal    .score-val { color: #a78bfa; }
-  .score-card.overall .score-val { color: #fb923c; }
+/* ══════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════ */
+.topbar{
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px 0 0;
+  background:rgba(7,7,15,0.85);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  position:relative;z-index:30;
+}
 
-  .score-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; margin-top: 14px; }
-  .score-bar-fill { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
-  .score-card.habit   .score-bar-fill { background: #38bdf8; }
-  .score-card.finance .score-bar-fill { background: #34d399; }
-  .score-card.goal    .score-bar-fill { background: #a78bfa; }
-  .score-card.overall .score-bar-fill { background: #fb923c; }
+.logo{
+  width:var(--sidebar-w);
+  display:flex;align-items:center;gap:10px;
+  padding:0 20px;border-right:1px solid var(--border);height:100%;
+  text-decoration:none;flex-shrink:0;
+}
+.logo-mark{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--purple2),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+  box-shadow:0 0 20px rgba(162,155,254,0.3);
+}
+.logo-text{
+  font-family:'Syne',sans-serif;
+  font-size:16px;font-weight:700;letter-spacing:-0.5px;color:#fff;
+}
+.logo-text span{color:var(--purple)}
 
-  /* ── TWO COL ── */
-  .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+.topbar-center{
+  flex:1;display:flex;align-items:center;padding-left:20px;
+}
+/* Command pill */
+.cmd-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:10px;padding:7px 14px;
+  font-size:12px;color:var(--muted);cursor:pointer;
+  transition:all 0.2s;width:260px;
+}
+.cmd-pill:hover{border-color:rgba(162,155,254,0.3);color:var(--text)}
+.cmd-pill i{font-size:14px}
+.cmd-key{
+  margin-left:auto;font-size:10px;font-family:'DM Mono',monospace;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:4px;padding:1px 5px;color:var(--dim);
+}
 
-  /* ── PANELS ── */
-  .panel {
-    background: #0d1829;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .panel-title {
-    font-size: 13px; font-weight: 500; color: #94a3b8;
-    margin-bottom: 16px;
-    display: flex; align-items: center; gap: 7px;
-  }
-  .panel-title i { font-size: 15px; color: #475569; }
-  .chart-wrap { height: 170px; position: relative; }
+.topbar-right{display:flex;align-items:center;gap:10px}
 
-  /* ── AI PANEL ── */
-  .ai-panel {
-    background: linear-gradient(135deg, #0c1f3a, #0d1829);
-    border: 1px solid rgba(56,189,248,0.15);
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .ai-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(56,189,248,0.1);
-    border: 1px solid rgba(56,189,248,0.2);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 11px; color: #38bdf8;
-    margin-bottom: 14px;
-  }
-  .ai-text { font-size: 13px; color: #94a3b8; line-height: 1.75; }
-  .ai-text strong { color: #e2e8f0; font-weight: 500; }
+.tb-btn{
+  width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--border);cursor:pointer;
+  color:var(--muted);font-size:15px;transition:all 0.15s;position:relative;
+}
+.tb-btn:hover{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.tb-notif{
+  position:absolute;top:-3px;right:-3px;width:8px;height:8px;
+  border-radius:50%;background:var(--pink);border:2px solid var(--bg);
+}
 
-  /* ── ACTIVITY ── */
-  .activity-list { display: flex; flex-direction: column; gap: 8px; }
-  .activity-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
-    border-radius: 8px;
-  }
-  .activity-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: #475569; }
-  .activity-text { font-size: 13px; color: #64748b; flex: 1; }
-  .activity-text strong { color: #94a3b8; font-weight: 500; }
-  .activity-time { font-size: 11px; color: #334155; font-family: 'DM Mono', monospace; }
+.ai-status{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(162,155,254,0.08);
+  border:1px solid rgba(162,155,254,0.2);
+  border-radius:20px;padding:5px 12px;
+  font-size:11px;color:var(--purple);
+  font-family:'DM Mono',monospace;
+}
+.pulse-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 6px var(--cyan);
+  animation:pulse-glow 2s ease-in-out infinite;
+}
+@keyframes pulse-glow{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.4;transform:scale(0.8)}
+}
 
-  .empty { color: #334155; font-size: 13px; padding: 8px 0; }
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:4px 12px 4px 4px;cursor:pointer;
+}
+.av{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple2),var(--pink));
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.user-pill span{font-size:12px;color:var(--muted)}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{
+  background:rgba(7,7,15,0.90);
+  backdrop-filter:blur(24px);
+  border-right:1px solid var(--border);
+  padding:14px 8px 16px;
+  display:flex;flex-direction:column;gap:1px;
+  overflow-y:auto;position:relative;z-index:20;
+}
+
+.nav-section{
+  font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--dim);padding:12px 10px 4px;font-weight:600;
+}
+
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:9px;
+  font-size:12.5px;color:var(--muted);cursor:pointer;
+  transition:all 0.15s;border:none;background:none;
+  width:100%;text-align:left;position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(162,155,254,0.14),rgba(0,210,255,0.06));
+  color:var(--purple);
+  border:1px solid rgba(162,155,254,0.15);
+}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;
+  width:2px;border-radius:2px;background:var(--purple);
+}
+.nav-item i{font-size:15px;opacity:0.85;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;font-size:9.5px;padding:1px 6px;border-radius:4px;
+  background:rgba(162,155,254,0.15);color:var(--purple);
+  font-family:'DM Mono',monospace;
+}
+.nav-badge.red{background:rgba(248,113,113,0.15);color:var(--red)}
+.nav-badge.green{background:rgba(0,210,160,0.15);color:var(--green)}
+
+.sidebar-divider{height:1px;background:var(--border);margin:6px 10px}
+
+.sidebar-foot{
+  margin-top:auto;padding:12px 10px 0;
+}
+.life-score-mini{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;
+}
+.lsm-label{font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);margin-bottom:8px}
+.lsm-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.lsm-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff}
+.lsm-delta{font-size:11px;color:var(--green);font-family:'DM Mono',monospace}
+.lsm-bar{height:2px;background:rgba(255,255,255,0.06);border-radius:2px}
+.lsm-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--purple2),var(--cyan));transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+
+/* ══════════════════════════════════════
+   CONTENT AREA
+══════════════════════════════════════ */
+.content{
+  overflow-y:auto;
+  background:var(--bg);
+  position:relative;
+}
+
+.page{display:none;flex-direction:column;gap:18px;padding:22px 24px 32px;animation:pageIn 0.25s ease}
+.page.active{display:flex}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════════════
+   PAGE HEADER
+══════════════════════════════════════ */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.ph-left h1{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:700;
+  letter-spacing:-0.5px;color:#fff;line-height:1.2;
+}
+.ph-left p{font-size:12px;color:var(--muted);margin-top:4px}
+.ph-right{display:flex;align-items:center;gap:8px}
+
+.chip{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:7px;padding:5px 10px;white-space:nowrap;
+}
+.chip.ai{background:rgba(162,155,254,0.08);border-color:rgba(162,155,254,0.2);color:var(--purple)}
+.chip.live{color:var(--green);border-color:rgba(0,210,160,0.2);background:rgba(0,210,160,0.06)}
+
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite;box-shadow:0 0 4px var(--green)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* btn */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:500;
+  border:none;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;
+}
+.btn-ghost{background:var(--bg2);border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-purple{background:linear-gradient(135deg,var(--purple2),rgba(162,155,254,0.8));color:#fff;box-shadow:0 0 20px rgba(162,155,254,0.25)}
+.btn-purple:hover{box-shadow:0 0 30px rgba(162,155,254,0.4);transform:translateY(-1px)}
+
+/* ══════════════════════════════════════
+   GLASS PANEL
+══════════════════════════════════════ */
+.glass{
+  background:rgba(11,11,24,0.75);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  border-radius:14px;
+  position:relative;overflow:hidden;
+}
+.glass::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.03) 0%,transparent 60%);
+  pointer-events:none;border-radius:inherit;
+}
+.glass-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px 0;margin-bottom:14px;
+}
+.glass-title{
+  display:flex;align-items:center;gap:7px;
+  font-size:12.5px;font-weight:500;color:var(--text);
+}
+.glass-title i{font-size:14px;color:var(--muted)}
+.glass-body{padding:0 18px 18px}
+
+/* ══════════════════════════════════════
+   DASHBOARD — HERO SECTION
+══════════════════════════════════════ */
+.hero{
+  background:linear-gradient(135deg,rgba(124,115,245,0.08) 0%,rgba(0,210,255,0.04) 50%,rgba(253,121,168,0.06) 100%);
+  border:1px solid var(--border);border-radius:18px;
+  padding:28px 32px;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.025) 0%,transparent 50%);
+  pointer-events:none;
+}
+/* hero aurora streaks */
+.hero::after{
+  content:'';position:absolute;top:-60px;right:200px;
+  width:1px;height:200px;
+  background:linear-gradient(180deg,transparent,rgba(162,155,254,0.3),transparent);
+  transform:rotate(15deg);animation:streak 6s ease-in-out infinite;
+}
+@keyframes streak{0%,100%{opacity:0.3;transform:rotate(15deg) translateX(0)}50%{opacity:0.8;transform:rotate(15deg) translateX(10px)}}
+
+.hero-left{}
+.hero-greeting{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;
+  letter-spacing:-0.8px;color:#fff;
+  line-height:1.15;margin-bottom:8px;
+}
+.hero-greeting .highlight{
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:480px;margin-bottom:20px}
+.hero-sub strong{color:var(--text);font-weight:500}
+
+.hero-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.quick-action{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 13px;border-radius:9px;font-size:12px;
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;transition:all 0.2s;
+}
+.quick-action:hover{border-color:rgba(162,155,254,0.3);color:var(--purple);background:rgba(162,155,254,0.06)}
+.quick-action i{font-size:14px}
+
+.hero-right{display:flex;flex-direction:column;align-items:center;gap:12px}
+
+/* Score orb */
+.score-orb{position:relative;width:140px;height:140px;flex-shrink:0}
+.orb-svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.orb-glow{
+  position:absolute;inset:20px;border-radius:50%;
+  background:radial-gradient(circle,rgba(162,155,254,0.25),transparent 70%);
+  animation:orb-breathe 3s ease-in-out infinite;
+}
+@keyframes orb-breathe{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.orb-inner{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.orb-num{
+  font-family:'Syne',sans-serif;font-size:34px;font-weight:800;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;
+}
+.orb-label{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+
+.hero-streaks{display:flex;align-items:center;gap:6px}
+.streak-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+}
+.streak-val{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff}
+.streak-lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em}
+
+/* ══════════════════════════════════════
+   SCORE CARDS
+══════════════════════════════════════ */
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+.sc{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:16px;position:relative;overflow:hidden;
+  cursor:default;transition:border-color 0.2s,transform 0.2s;
+}
+.sc:hover{transform:translateY(-2px)}
+.sc-glow{
+  position:absolute;bottom:-24px;right:-24px;
+  width:80px;height:80px;border-radius:50%;filter:blur(28px);opacity:0.18;
+}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sc-tag{font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);font-weight:600}
+.sc-ico{
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.sc-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.sc-bar{height:2px;background:rgba(255,255,255,0.05);border-radius:2px;margin:10px 0 6px}
+.sc-fill{height:100%;border-radius:2px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.sc-delta{font-size:10.5px;color:var(--dim);font-family:'DM Mono',monospace}
+.sc-delta.up{color:var(--green)}
+.sc-delta.dn{color:var(--red)}
+
+/* color variants */
+.sc-habit .sc-num,.sc-habit .sc-ico{color:var(--purple)}
+.sc-habit .sc-ico{background:rgba(162,155,254,0.1)}
+.sc-habit .sc-glow{background:var(--purple)}
+.sc-habit .sc-fill{background:linear-gradient(90deg,var(--purple2),var(--purple))}
+.sc-habit:hover{border-color:rgba(162,155,254,0.25)}
+
+.sc-finance .sc-num,.sc-finance .sc-ico{color:var(--green)}
+.sc-finance .sc-ico{background:rgba(0,210,160,0.1)}
+.sc-finance .sc-glow{background:var(--green)}
+.sc-finance .sc-fill{background:linear-gradient(90deg,#00a87c,var(--green))}
+.sc-finance:hover{border-color:rgba(0,210,160,0.25)}
+
+.sc-goal .sc-num,.sc-goal .sc-ico{color:var(--pink)}
+.sc-goal .sc-ico{background:rgba(253,121,168,0.1)}
+.sc-goal .sc-glow{background:var(--pink)}
+.sc-goal .sc-fill{background:linear-gradient(90deg,#e0508a,var(--pink))}
+.sc-goal:hover{border-color:rgba(253,121,168,0.25)}
+
+.sc-overall .sc-num,.sc-overall .sc-ico{color:var(--amber)}
+.sc-overall .sc-ico{background:rgba(253,203,110,0.1)}
+.sc-overall .sc-glow{background:var(--amber)}
+.sc-overall .sc-fill{background:linear-gradient(90deg,#f0a500,var(--amber))}
+.sc-overall:hover{border-color:rgba(253,203,110,0.25)}
+
+/* ══════════════════════════════════════
+   GRID LAYOUTS
+══════════════════════════════════════ */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-7-3{display:grid;grid-template-columns:1fr 300px;gap:14px}
+.grid-6-4{display:grid;grid-template-columns:1.5fr 1fr;gap:14px}
+
+/* ══════════════════════════════════════
+   AI CARD
+══════════════════════════════════════ */
+.ai-card{
+  background:linear-gradient(135deg,rgba(162,155,254,0.06),rgba(0,210,255,0.04));
+  border:1px solid rgba(162,155,254,0.2);
+  border-radius:14px;padding:20px;position:relative;overflow:hidden;
+}
+.ai-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(162,155,254,0.12),transparent 70%);
+  animation:orb-breathe 4s ease-in-out infinite;
+}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ai-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(162,155,254,0.1);border:1px solid rgba(162,155,254,0.25);
+  border-radius:20px;padding:4px 10px;font-size:10px;
+  color:var(--purple);letter-spacing:0.08em;text-transform:uppercase;font-weight:600;
+}
+.ai-text{font-size:13px;color:var(--muted);line-height:1.75}
+.ai-text strong{color:var(--text);font-weight:500}
+.ai-divider{height:1px;background:rgba(162,155,254,0.1);margin:14px 0}
+.ai-footer{display:flex;align-items:center;justify-content:space-between}
+.ai-metrics{display:flex;gap:14px}
+.ai-metric{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace}
+.ai-metric i{font-size:13px;color:var(--muted)}
+.ai-metric span{color:var(--text)}
+
+/* ══════════════════════════════════════
+   CHART PANELS
+══════════════════════════════════════ */
+.chart-panel{
+  background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px;
+}
+.cp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cp-title{font-size:12.5px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:7px}
+.cp-title i{font-size:14px;color:var(--muted)}
+.cp-legend{display:flex;gap:12px}
+.cp-leg-item{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted)}
+.cp-leg-dot{width:7px;height:7px;border-radius:2px}
+.chart-tabs{display:flex;gap:3px}
+.ctab{
+  font-size:10.5px;padding:3px 9px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--dim);cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s;
+}
+.ctab:hover{color:var(--muted)}
+.ctab.active{background:rgba(162,155,254,0.12);color:var(--purple);border-color:rgba(162,155,254,0.25)}
+.chart-wrap{position:relative}
+.chart-wrap.h160{height:160px}
+.chart-wrap.h200{height:200px}
+.chart-wrap.h220{height:220px}
+.chart-wrap.h180{height:180px}
+.chart-wrap.h240{height:240px}
+
+/* TOOLTIP overrides */
+.chartjs-tooltip-override{}
+
+/* ══════════════════════════════════════
+   ACTIVITY LIST
+══════════════════════════════════════ */
+.act-list{display:flex;flex-direction:column;gap:5px}
+.act-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;transition:border-color 0.15s;
+}
+.act-item:hover{border-color:var(--border2)}
+.act-ico{
+  width:26px;height:26px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;
+}
+.act-ico.h{background:rgba(162,155,254,0.1);color:var(--purple)}
+.act-ico.g{background:rgba(253,121,168,0.1);color:var(--pink)}
+.act-ico.f{background:rgba(0,210,160,0.1);color:var(--green)}
+.act-ico.d{background:rgba(255,255,255,0.04);color:var(--muted)}
+.act-ico.a{background:rgba(253,203,110,0.1);color:var(--amber)}
+.act-body{flex:1;min-width:0}
+.act-name{font-size:12px;font-weight:500;color:var(--text)}
+.act-meta{font-size:10.5px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-time{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;flex-shrink:0}
+
+/* ══════════════════════════════════════
+   HABIT HEATMAP
+══════════════════════════════════════ */
+.heatmap-grid{display:flex;gap:3px;flex-wrap:nowrap;overflow-x:auto}
+.hm-col{display:flex;flex-direction:column;gap:3px}
+.hm-cell{
+  width:11px;height:11px;border-radius:2.5px;
+  background:rgba(162,155,254,0.08);transition:opacity 0.2s;
+}
+.hm-cell.l1{background:rgba(162,155,254,0.2)}
+.hm-cell.l2{background:rgba(162,155,254,0.45)}
+.hm-cell.l3{background:rgba(162,155,254,0.72)}
+.hm-cell.l4{background:rgba(162,155,254,1);box-shadow:0 0 4px rgba(162,155,254,0.5)}
+.hm-days{display:flex;flex-direction:column;gap:3px;margin-right:6px}
+.hm-day{font-size:8.5px;color:var(--dim);height:11px;display:flex;align-items:center;font-family:'DM Mono',monospace}
+
+/* ══════════════════════════════════════
+   GOAL CARDS
+══════════════════════════════════════ */
+.goal-list{display:flex;flex-direction:column;gap:8px}
+.goal-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;transition:border-color 0.2s,transform 0.2s;cursor:default;
+}
+.goal-card:hover{border-color:var(--border2);transform:translateX(2px)}
+.gc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.gc-info{}
+.gc-name{font-size:13px;font-weight:500;color:var(--text)}
+.gc-meta{font-size:10.5px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:3px}
+.gc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.gc-pct{font-family:'Syne',sans-serif;font-size:18px;font-weight:700}
+.gc-ai{font-size:9.5px;font-family:'DM Mono',monospace}
+.gc-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:4px}
+.gc-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.gc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.gc-status{font-size:10.5px;color:var(--dim)}
+.gc-badge{
+  font-size:9.5px;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;
+}
+
+/* ══════════════════════════════════════
+   HABIT CARDS
+══════════════════════════════════════ */
+.habit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.habit-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:14px;transition:all 0.2s;cursor:default;
+}
+.habit-card:hover{border-color:rgba(162,155,254,0.2);transform:translateY(-2px)}
+.hc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.hc-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.hc-streak{
+  display:flex;align-items:center;gap:3px;font-size:11px;font-weight:600;
+  color:var(--amber);font-family:'DM Mono',monospace;
+}
+.hc-bar{height:3px;background:rgba(255,255,255,0.05);border-radius:3px;margin:8px 0 6px}
+.hc-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--purple2),var(--purple))}
+.hc-meta{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace}
+.hc-check{
+  width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+  transition:all 0.2s;cursor:pointer;margin-top:8px;
+}
+.hc-check.done{background:rgba(0,210,160,0.15);border-color:rgba(0,210,160,0.4);color:var(--green)}
+
+/* ══════════════════════════════════════
+   FINANCE
+══════════════════════════════════════ */
+.fin-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.fin-stat{
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;
+}
+.fin-label{font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);font-weight:600;margin-bottom:6px}
+.fin-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:700}
+.fin-sub{font-size:10.5px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace}
+
+.tx-list{display:flex;flex-direction:column;gap:6px}
+.tx-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;transition:border-color 0.15s;
+}
+.tx-item:hover{border-color:var(--border2)}
+.tx-ico{
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;
+}
+.tx-info{flex:1}
+.tx-name{font-size:12.5px;font-weight:500;color:var(--text)}
+.tx-date{font-size:10.5px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:1px}
+.tx-amt{font-size:13px;font-weight:600;font-family:'DM Mono',monospace}
+.tx-amt.credit{color:var(--green)}
+.tx-amt.debit{color:var(--red)}
+
+/* category pills */
+.cat-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.cat-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;
+  border:1px solid;cursor:pointer;transition:all 0.15s;
+}
+.cat-pill.active{opacity:1}
+.cat-pill:not(.active){opacity:0.5}
+
+/* ══════════════════════════════════════
+   AI BRIEFING PAGE
+══════════════════════════════════════ */
+.briefing-hero{
+  background:linear-gradient(135deg,rgba(124,115,245,0.1),rgba(0,210,255,0.05),rgba(253,121,168,0.06));
+  border:1px solid rgba(162,155,254,0.18);border-radius:18px;
+  padding:32px;position:relative;overflow:hidden;
+}
+.bh-bg-glow{
+  position:absolute;top:-80px;right:-80px;width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(162,155,254,0.1),transparent 70%);
+  animation:orb-breathe 5s ease-in-out infinite;
+}
+.bh-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:10px}
+.bh-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:6px}
+.bh-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:22px;max-width:600px}
+.bh-insights{display:flex;flex-direction:column;gap:8px}
+.insight-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 14px;background:rgba(11,11,24,0.6);border:1px solid var(--border);
+  border-radius:10px;font-size:12.5px;color:var(--muted);line-height:1.6;
+}
+.insight-item i{color:var(--purple);font-size:15px;margin-top:1px;flex-shrink:0}
+
+/* AI LOGIC */
+.logic-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px}
+.logic-title{
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;
+  display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.logic-sub{font-size:12px;color:var(--muted);margin-bottom:22px;line-height:1.6}
+
+.pipeline{display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.pipe-step{
+  flex:1;padding:14px 12px;text-align:center;
+  border-right:1px solid var(--border);
+  background:var(--bg3);position:relative;
+  transition:background 0.2s;
+}
+.pipe-step:last-child{border-right:none}
+.pipe-step:hover{background:var(--bg4)}
+.pipe-step::after{
+  content:'›';position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+  color:var(--dim);font-size:16px;z-index:2;
+}
+.pipe-step:last-child::after{display:none}
+.pipe-ico{font-size:20px;margin-bottom:6px;display:block}
+.pipe-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px;letter-spacing:0.02em}
+.pipe-desc{font-size:10px;color:var(--dim);line-height:1.5}
+
+.logic-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.logic-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
+.lc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.lc-icon{
+  width:28px;height:28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.lc-icon.rule{background:rgba(96,165,250,0.12);color:var(--blue)}
+.lc-icon.ml{background:rgba(162,155,254,0.12);color:var(--purple)}
+.lc-icon.weight{background:rgba(0,210,160,0.12);color:var(--green)}
+.lc-icon.trigger{background:rgba(253,203,110,0.12);color:var(--amber)}
+.lc-title{font-size:12px;font-weight:600;color:var(--text)}
+.lc-body{font-size:11.5px;color:var(--muted);line-height:1.7}
+.lc-body code{
+  font-family:'DM Mono',monospace;font-size:10.5px;
+  background:rgba(162,155,254,0.1);color:var(--purple);
+  padding:1px 5px;border-radius:4px;
+}
+
+.weight-bars{margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.wb-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.wb-label{color:var(--muted);width:56px;flex-shrink:0}
+.wb-track{flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden}
+.wb-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.wb-pct{color:var(--dim);font-family:'DM Mono',monospace;width:28px;text-align:right;flex-shrink:0}
+
+.logic-note{
+  background:rgba(162,155,254,0.05);border:1px solid rgba(162,155,254,0.15);
+  border-radius:9px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.7;
+}
+.logic-note strong{color:var(--purple)}
+
+/* ══════════════════════════════════════
+   TIMELINE (Feed)
+══════════════════════════════════════ */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:14px;padding-bottom:18px;position:relative}
+.tl-item:not(:last-child)::before{
+  content:'';position:absolute;left:11px;top:26px;bottom:0;
+  width:1px;background:var(--border);
+}
+.tl-dot{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+  border:1px solid;flex-shrink:0;
+}
+.tl-dot.h{background:rgba(162,155,254,0.1);color:var(--purple);border-color:rgba(162,155,254,0.2)}
+.tl-dot.g{background:rgba(253,121,168,0.1);color:var(--pink);border-color:rgba(253,121,168,0.2)}
+.tl-dot.f{background:rgba(0,210,160,0.1);color:var(--green);border-color:rgba(0,210,160,0.2)}
+.tl-dot.d{background:var(--bg2);color:var(--muted);border-color:var(--border)}
+.tl-body{flex:1}
+.tl-type{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.tl-meta{font-size:11px;color:var(--dim);font-family:'DM Mono',monospace;line-height:1.5}
+.tl-time{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:3px}
+
+/* ══════════════════════════════════════
+   ANALYTICS PAGE
+══════════════════════════════════════ */
+.burnout-bar{
+  height:8px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(90deg,var(--green),var(--amber),var(--red));
+  position:relative;margin-bottom:6px;
+}
+.burnout-needle{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:2px;height:14px;background:#fff;border-radius:2px;
+  box-shadow:0 0 6px rgba(255,255,255,0.8);
+}
+
+/* mini stat tiles */
+.stat-tile{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;
+}
+.st-label{font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);font-weight:600;margin-bottom:5px}
+.st-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff}
+.st-sub{font-size:10.5px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
+
+/* ══════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════ */
+.empty-state{
+  padding:40px 20px;text-align:center;color:var(--dim);font-size:12px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.empty-state i{font-size:28px;color:var(--border2)}
+
+/* ══════════════════════════════════════
+   NOTIFICATION PANEL (floating)
+══════════════════════════════════════ */
+.notif-panel{
+  position:fixed;top:64px;right:16px;width:300px;
+  background:rgba(11,11,24,0.95);backdrop-filter:blur(20px);
+  border:1px solid var(--border2);border-radius:14px;z-index:100;
+  padding:16px;display:none;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:slideIn 0.2s ease;
+}
+.notif-panel.show{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.notif-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.notif-title{font-size:12px;font-weight:600;color:var(--text)}
+.notif-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0}
+.notif-item{
+  display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);
+}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.notif-body{font-size:11.5px;color:var(--muted);line-height:1.5}
+.notif-body strong{color:var(--text)}
+.notif-time{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:2px}
+
+/* AI COPILOT OVERLAY */
+.copilot{
+  position:fixed;bottom:24px;right:24px;z-index:200;
+  display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+}
+.copilot-btn{
+  width:48px;height:48px;border-radius:50%;cursor:pointer;
+  background:linear-gradient(135deg,var(--purple2),var(--cyan));
+  border:none;display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:#fff;
+  box-shadow:0 0 30px rgba(162,155,254,0.4);
+  transition:all 0.2s;
+}
+.copilot-btn:hover{transform:scale(1.08);box-shadow:0 0 40px rgba(162,155,254,0.6)}
+.copilot-chat{
+  width:320px;
+  background:rgba(11,11,24,0.97);backdrop-filter:blur(24px);
+  border:1px solid rgba(162,155,254,0.2);border-radius:16px;
+  display:none;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 60px rgba(162,155,254,0.06);
+}
+.copilot-chat.show{display:block;animation:slideIn 0.2s ease}
+.cc-header{
+  display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-bottom:1px solid rgba(162,155,254,0.1);
+}
+.cc-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple2),var(--cyan));
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+.cc-title{font-size:12.5px;font-weight:600;color:#fff}
+.cc-sub{font-size:10px;color:var(--green);font-family:'DM Mono',monospace}
+.cc-close{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px}
+.cc-messages{height:200px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.cc-msg{
+  padding:8px 11px;border-radius:10px;font-size:12px;line-height:1.55;max-width:85%;
+}
+.cc-msg.ai{background:rgba(162,155,254,0.1);color:var(--text);border-radius:10px 10px 10px 3px}
+.cc-msg.user{background:var(--bg4);color:var(--muted);align-self:flex-end;border-radius:10px 10px 3px 10px}
+.cc-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid rgba(162,155,254,0.1)}
+.cc-input input{
+  flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;
+  padding:7px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;
+  outline:none;
+}
+.cc-input input:focus{border-color:rgba(162,155,254,0.4)}
+.cc-send{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--purple2),var(--cyan));
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14px;flex-shrink:0;
+}
+
+/* ══════════════════════════════════════
+   FOCUS MODE
+══════════════════════════════════════ */
+.focus-hero{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 24px;text-align:center;
+  background:linear-gradient(135deg,rgba(162,155,254,0.06),rgba(0,210,255,0.03));
+  border:1px solid rgba(162,155,254,0.15);border-radius:18px;
+  position:relative;overflow:hidden;
+}
+.focus-timer-display{
+  font-family:'Syne',sans-serif;font-size:72px;font-weight:800;
+  letter-spacing:-3px;color:#fff;line-height:1;margin:20px 0;
+  text-shadow:0 0 40px rgba(162,155,254,0.3);
+}
+.focus-label{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+.focus-controls{display:flex;align-items:center;gap:12px;margin-top:20px}
+.focus-btn{
+  padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;
+}
+.focus-btn.primary{
+  background:linear-gradient(135deg,var(--purple2),var(--cyan));color:#fff;
+  box-shadow:0 0 30px rgba(162,155,254,0.3);
+}
+.focus-btn.primary:hover{box-shadow:0 0 50px rgba(162,155,254,0.5);transform:scale(1.03)}
+.focus-btn.ghost{background:var(--bg3);border:1px solid var(--border2);color:var(--muted)}
+
+/* ══════════════════════════════════════
+   CALENDAR PAGE
+══════════════════════════════════════ */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
+.cal-day-header{text-align:center;font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;padding:4px 0;letter-spacing:0.08em}
+.cal-day{
+  aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--border);font-size:12px;
+  transition:all 0.15s;position:relative;
+}
+.cal-day:hover{border-color:rgba(162,155,254,0.3);background:rgba(162,155,254,0.06)}
+.cal-day.today{border-color:rgba(162,155,254,0.5);background:rgba(162,155,254,0.1);color:var(--purple)}
+.cal-day.has-event::after{
+  content:'';position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--cyan);
+}
+.cal-day.other-month{opacity:0.3}
+.cal-event{
+  padding:4px 10px;border-radius:6px;font-size:11px;margin-bottom:4px;
+  font-family:'DM Mono',monospace;border:1px solid;
+}
+
+/* ══════════════════════════════════════
+   STUDY PLANNER
+══════════════════════════════════════ */
+.subject-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;transition:all 0.2s;
+}
+.subject-card:hover{border-color:var(--border2)}
+.sub-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.sub-meta{font-size:10.5px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:10px}
+.sub-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:4px;margin-bottom:4px}
+.sub-fill{height:100%;border-radius:4px}
+.sub-pct{font-size:10.5px;color:var(--muted);text-align:right}
+.pomodoro{
+  display:flex;flex-direction:column;align-items:center;
+  background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;
+  gap:10px;
+}
+.pomo-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.pomo-time{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:#fff;letter-spacing:-2px;text-shadow:0 0 20px rgba(162,155,254,0.3)}
+.pomo-controls{display:flex;gap:8px}
+.pomo-btn{padding:7px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+
+/* ══════════════════════════════════════
+   MISC UTILS
+══════════════════════════════════════ */
+.hidden{display:none}
+.spacer{flex:1}
+.text-purple{color:var(--purple)}
+.text-green{color:var(--green)}
+.text-pink{color:var(--pink)}
+.text-amber{color:var(--amber)}
+.text-cyan{color:var(--cyan)}
+.text-muted{color:var(--muted)}
+
+.tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-weight:500;
+}
+.tag-p{background:rgba(162,155,254,0.12);color:var(--purple);border:1px solid rgba(162,155,254,0.2)}
+.tag-g{background:rgba(0,210,160,0.12);color:var(--green);border:1px solid rgba(0,210,160,0.2)}
+.tag-r{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.tag-a{background:rgba(253,203,110,0.12);color:var(--amber);border:1px solid rgba(253,203,110,0.2)}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:900px){
+  :root{--sidebar-w:60px}
+  .logo-text,.nav-section,.nav-badge,.nav-item span:not(.nav-badge),
+  .sidebar-foot .life-score-mini{display:none}
+  .nav-item{justify-content:center;padding:10px 0}
+  .nav-item i{font-size:18px;opacity:1}
+  .score-grid{grid-template-columns:repeat(2,1fr)}
+  .grid-7-3,.grid-6-4{grid-template-columns:1fr}
+  .hero{grid-template-columns:1fr}
+  .hero-right{flex-direction:row}
+  .habit-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .score-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.logic-cards,.grid-3{grid-template-columns:1fr}
+  .cmd-pill{display:none}
+  .fin-stat-grid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">Life<span>OS</span> AI</div>
-  <div class="user-pill">
-    <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
-    <span>{{ request.user.username }}</span>
-  </div>
+<!-- AMBIENT BG -->
+<div class="ambient">
+  <div class="amb-orb"></div>
+  <div class="amb-orb"></div>
+  <div class="amb-orb"></div>
 </div>
 
-<div class="main">
+<!-- ══════════════════════════════════════
+     SHELL
+══════════════════════════════════════ -->
+<div class="shell">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="nav-section">Overview</div>
-    <a href="#" class="nav-item active"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
-    <a href="#" class="nav-item"><i class="ti ti-chart-line"></i> Analytics</a>
-    <div class="nav-section">Tracking</div>
-    <a href="#" class="nav-item"><i class="ti ti-repeat"></i> Habits</a>
-    <a href="#" class="nav-item"><i class="ti ti-target"></i> Goals</a>
-    <a href="#" class="nav-item"><i class="ti ti-wallet"></i> Finance</a>
-    <div class="nav-section">AI</div>
-    <a href="#" class="nav-item"><i class="ti ti-brain"></i> Daily Briefing</a>
-    <a href="#" class="nav-item"><i class="ti ti-activity"></i> Activity Feed</a>
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">🧠</div>
+    <div class="logo-text">Life<span>OS</span> AI</div>
+  </div>
+  <div class="topbar-center">
+    <div class="cmd-pill" onclick="toggleCopilot()">
+      <i class="ti ti-search" style="font-size:13px"></i>
+      Ask AI anything…
+      <div class="cmd-key">⌘K</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="ai-status">
+      <div class="pulse-dot"></div>
+      AI Active
+    </div>
+    <button class="tb-btn" onclick="toggleNotif()" title="Notifications">
+      <i class="ti ti-bell"></i>
+      <div class="tb-notif"></div>
+    </button>
+    <div class="user-pill">
+      <div class="av">ME</div>
+      <span>Meenakshi</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="nav-section">Overview</div>
+  <button class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i> <span>Dashboard</span></button>
+  <button class="nav-item" onclick="showPage('analytics',this)"><i class="ti ti-chart-line"></i> <span>Analytics</span><span class="nav-badge">New</span></button>
+
+  <div class="nav-section">Life Pillars</div>
+  <button class="nav-item" onclick="showPage('habits',this)"><i class="ti ti-repeat"></i> <span>Habit Engine</span><span class="nav-badge green">6</span></button>
+  <button class="nav-item" onclick="showPage('goals',this)"><i class="ti ti-target"></i> <span>Goals OS</span><span class="nav-badge">4</span></button>
+  <button class="nav-item" onclick="showPage('finance',this)"><i class="ti ti-wallet"></i> <span>Finance</span></button>
+  <button class="nav-item" onclick="showPage('study',this)"><i class="ti ti-school"></i> <span>Study Planner</span></button>
+  <button class="nav-item" onclick="showPage('calendar',this)"><i class="ti ti-calendar"></i> <span>Smart Calendar</span></button>
+
+  <div class="nav-section">AI Center</div>
+  <button class="nav-item" onclick="showPage('briefing',this)"><i class="ti ti-sparkles"></i> <span>Daily Briefing</span><span class="nav-badge red">!</span></button>
+  <button class="nav-item" onclick="showPage('focus',this)"><i class="ti ti-focus-2"></i> <span>Focus Mode</span></button>
+  <button class="nav-item" onclick="showPage('feed',this)"><i class="ti ti-activity"></i> <span>Activity Feed</span></button>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-foot">
+    <div class="life-score-mini">
+      <div class="lsm-label">Life Score</div>
+      <div class="lsm-row">
+        <div class="lsm-val">78.4</div>
+        <div class="lsm-delta">↑ +2.1</div>
+      </div>
+      <div class="lsm-bar"><div class="lsm-fill" style="width:78.4%"></div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     CONTENT
+══════════════════════════════════════ -->
+<main class="content">
+
+<!-- ──────────────────────────────────
+     DASHBOARD
+────────────────────────────────── -->
+<section class="page active" id="page-dashboard">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-greeting">Good morning, <span class="highlight">Meenakshi</span> 👋<br>Ready to dominate today?</div>
+      <div class="hero-sub">Your AI has analyzed <strong>187 data points</strong> overnight. You're on track for a <strong>top 15%</strong> productivity day. 3 high-impact actions are queued.</div>
+      <div class="hero-actions">
+        <div class="quick-action"><i class="ti ti-player-play"></i> Start Focus</div>
+        <div class="quick-action"><i class="ti ti-checklist"></i> Today's Tasks</div>
+        <div class="quick-action"><i class="ti ti-sparkles"></i> AI Suggest</div>
+        <div class="quick-action"><i class="ti ti-calendar-event"></i> Schedule</div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="score-orb">
+        <div class="orb-glow"></div>
+        <svg class="orb-svg" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="orbGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#7c73f5"/>
+              <stop offset="100%" stop-color="#00d2ff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="70" cy="70" r="58" stroke="rgba(162,155,254,0.1)" stroke-width="8"/>
+          <circle cx="70" cy="70" r="58" stroke="url(#orbGrad)" stroke-width="8"
+            stroke-dasharray="364.4" stroke-dashoffset="79.6"
+            stroke-linecap="round"/>
+        </svg>
+        <div class="orb-inner">
+          <div class="orb-num" id="hero-score">78</div>
+          <div class="orb-label">Life Score</div>
+        </div>
+      </div>
+      <div class="hero-streaks">
+        <div class="streak-item"><div class="streak-val">6🔥</div><div class="streak-lbl">Streak</div></div>
+        <div class="streak-item"><div class="streak-val">3</div><div class="streak-lbl">Goals</div></div>
+        <div class="streak-item"><div class="streak-val">5h</div><div class="streak-lbl">Focus</div></div>
+      </div>
+    </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
+  <!-- SCORE CARDS -->
+  <div class="score-grid">
+    <div class="sc sc-habit">
+      <div class="sc-glow"></div>
+      <div class="sc-top"><div class="sc-tag">Habit Score</div><div class="sc-ico"><i class="ti ti-repeat"></i></div></div>
+      <div class="sc-num" data-target="82">82</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:82%"></div></div>
+      <div class="sc-delta dn">↓ 3.2 from yesterday</div>
+    </div>
+    <div class="sc sc-finance">
+      <div class="sc-glow"></div>
+      <div class="sc-top"><div class="sc-tag">Finance Score</div><div class="sc-ico"><i class="ti ti-wallet"></i></div></div>
+      <div class="sc-num" data-target="91">91</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:91%"></div></div>
+      <div class="sc-delta up">↑ 1.4 from yesterday</div>
+    </div>
+    <div class="sc sc-goal">
+      <div class="sc-glow"></div>
+      <div class="sc-top"><div class="sc-tag">Goal Score</div><div class="sc-ico"><i class="ti ti-target"></i></div></div>
+      <div class="sc-num" data-target="68">68</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:68%"></div></div>
+      <div class="sc-delta up">↑ 5.0 this week</div>
+    </div>
+    <div class="sc sc-overall">
+      <div class="sc-glow"></div>
+      <div class="sc-top"><div class="sc-tag">Overall Score</div><div class="sc-ico"><i class="ti ti-star"></i></div></div>
+      <div class="sc-num" data-target="78">78</div>
+      <div class="sc-bar"><div class="sc-fill" style="width:78%"></div></div>
+      <div class="sc-delta up">↑ Top 12% today</div>
+    </div>
+  </div>
 
-    <!-- HEADER -->
+  <!-- CHART + AI INSIGHT -->
+  <div class="grid-7-3">
+    <div class="chart-panel">
+      <div class="cp-header">
+        <div class="cp-title"><i class="ti ti-chart-bar"></i> Weekly Productivity</div>
+        <div class="chart-tabs">
+          <button class="ctab active">7d</button>
+          <button class="ctab">30d</button>
+          <button class="ctab">90d</button>
+        </div>
+      </div>
+      <div class="chart-wrap h160"><canvas id="chart-weekly" role="img" aria-label="Weekly productivity bar chart">Weekly scores Mon–Sun.</canvas></div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-header">
+        <div class="ai-pill"><div class="pulse-dot"></div> AI Insight</div>
+      </div>
+      <div class="ai-text">Your <strong>Finance score is exceptional</strong> — top 8% this week. Focus on completing <strong>3 habits before noon</strong> to push overall past 80. Your burnout risk is <strong style="color:var(--green)">Low (12%)</strong>.</div>
+      <div class="ai-divider"></div>
+      <div class="ai-footer">
+        <div class="ai-metrics">
+          <div class="ai-metric"><i class="ti ti-repeat"></i><span>82</span></div>
+          <div class="ai-metric"><i class="ti ti-wallet"></i><span>91</span></div>
+          <div class="ai-metric"><i class="ti ti-target"></i><span>68</span></div>
+        </div>
+        <div class="chip ai"><i class="ti ti-refresh" style="font-size:11px"></i>Live</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP + RADAR -->
+  <div class="grid-2">
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-layout-grid"></i> Habit Consistency Heatmap</div><span class="chip live"><div class="live-dot"></div>15 weeks</span></div>
+      <div id="heatmap-container" style="display:flex;gap:10px;align-items:flex-start"></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-header">
+        <div class="cp-title"><i class="ti ti-radar"></i> Life Balance Radar</div>
+      </div>
+      <div class="chart-wrap h220"><canvas id="chart-radar" role="img" aria-label="Life balance radar chart">Radar of all life dimensions.</canvas></div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="chart-panel">
+    <div class="cp-header">
+      <div class="cp-title"><i class="ti ti-activity"></i> Recent Activity</div>
+      <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="showPage('feed',document.querySelector('[onclick*=feed]'))">View all <i class="ti ti-arrow-right"></i></button>
+    </div>
+    <div class="act-list" id="dash-activity"></div>
+  </div>
+
+</section>
+
+<!-- ──────────────────────────────────
+     ANALYTICS
+────────────────────────────────── -->
+<section class="page" id="page-analytics">
+  <div class="page-header">
+    <div class="ph-left"><h1>Analytics</h1><p>Deep intelligence on your productivity patterns</p></div>
+    <div class="ph-right">
+      <div class="chip live"><div class="live-dot"></div>Real-time</div>
+      <button class="btn btn-purple"><i class="ti ti-download"></i> Export</button>
+    </div>
+  </div>
+
+  <!-- Mini stats -->
+  <div class="grid-3" style="grid-template-columns:repeat(6,1fr);gap:8px">
+    <div class="stat-tile"><div class="st-label">Focus Hours</div><div class="st-val" style="color:var(--cyan)">5.2h</div><div class="st-sub">↑ +0.8h vs avg</div></div>
+    <div class="stat-tile"><div class="st-label">Tasks Done</div><div class="st-val" style="color:var(--green)">14</div><div class="st-sub">of 18 planned</div></div>
+    <div class="stat-tile"><div class="st-label">Habits</div><div class="st-val" style="color:var(--purple)">5/6</div><div class="st-sub">83% completion</div></div>
+    <div class="stat-tile"><div class="st-label">Burnout Risk</div><div class="st-val" style="color:var(--green)">12%</div><div class="st-sub">Low — good</div></div>
+    <div class="stat-tile"><div class="st-label">Goal Velocity</div><div class="st-val" style="color:var(--pink)">+3.2%</div><div class="st-sub">this week</div></div>
+    <div class="stat-tile"><div class="st-label">AI Score</div><div class="st-val" style="color:var(--amber)">78.4</div><div class="st-sub">Top 12% today</div></div>
+  </div>
+
+  <!-- 4-week trend + Radar -->
+  <div class="grid-2">
+    <div class="chart-panel">
+      <div class="cp-header">
+        <div class="cp-title"><i class="ti ti-trending-up"></i> 4-Week Score Trend</div>
+        <div class="cp-legend">
+          <div class="cp-leg-item"><div class="cp-leg-dot" style="background:var(--purple)"></div>Habit</div>
+          <div class="cp-leg-item"><div class="cp-leg-dot" style="background:var(--green)"></div>Finance</div>
+          <div class="cp-leg-item"><div class="cp-leg-dot" style="background:var(--pink)"></div>Goal</div>
+        </div>
+      </div>
+      <div class="chart-wrap h200"><canvas id="chart-multiline" role="img" aria-label="4-week multi-line trend">4-week trend of habit, finance, goal scores.</canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-radar"></i> Capability Radar</div></div>
+      <div class="chart-wrap h200"><canvas id="chart-radar2" role="img" aria-label="Capability radar chart">Radar of 6 life dimensions.</canvas></div>
+    </div>
+  </div>
+
+  <!-- Burnout + Bar -->
+  <div class="grid-2">
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-heart-rate-monitor"></i> Burnout Risk Gauge</div><span class="tag tag-g">Low Risk</span></div>
+      <div style="padding:8px 0 4px">
+        <div class="burnout-bar" style="margin-bottom:8px">
+          <div class="burnout-needle" style="left:12%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:16px">
+          <span>Safe</span><span>Warning</span><span>Critical</span>
+        </div>
+      </div>
+      <div class="chart-wrap h160"><canvas id="chart-burnout" role="img" aria-label="Burnout probability over time">Burnout risk trend.</canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-chart-bar"></i> Score Breakdown</div></div>
+      <div class="chart-wrap h220"><canvas id="chart-breakdown" role="img" aria-label="Score breakdown animated bar chart">Habit, Finance, Goal, Overall breakdown.</canvas></div>
+    </div>
+  </div>
+
+  <!-- 30-day trend -->
+  <div class="chart-panel">
+    <div class="cp-header">
+      <div class="cp-title"><i class="ti ti-trending-up"></i> 30-Day Overall Trend</div>
+      <div class="chip ai"><div class="pulse-dot"></div>AI forecast included</div>
+    </div>
+    <div class="chart-wrap h180"><canvas id="chart-30d" role="img" aria-label="30-day trend line">30-day productivity trend with forecast.</canvas></div>
+  </div>
+
+  <!-- Distribution doughnut -->
+  <div class="grid-6-4">
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-clock"></i> Time Allocation (This Week)</div></div>
+      <div class="chart-wrap h240"><canvas id="chart-time" role="img" aria-label="Time allocation bar">Time split across categories.</canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-chart-donut"></i> Score Distribution</div></div>
+      <div class="chart-wrap h240"><canvas id="chart-donut" role="img" aria-label="Score distribution donut">Donut of habit, finance, goal scores.</canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     HABITS
+────────────────────────────────── -->
+<section class="page" id="page-habits">
+  <div class="page-header">
+    <div class="ph-left"><h1>Habit Engine 🔥</h1><p>Build unstoppable systems. One habit at a time.</p></div>
+    <div class="ph-right">
+      <div class="chip ai"><div class="pulse-dot"></div>AI Optimizing</div>
+      <button class="btn btn-purple"><i class="ti ti-plus"></i> New Habit</button>
+    </div>
+  </div>
+
+  <!-- XP bar -->
+  <div class="glass" style="padding:18px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff">Level 12 — Discipline Master <span style="font-size:12px;color:var(--amber)">⚡</span></div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px">2,840 / 3,500 XP to Level 13</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--amber)">2,840</div>
+        <div style="font-size:10px;color:var(--dim)">Total XP</div>
+      </div>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:6px;overflow:hidden">
+      <div style="height:100%;width:81%;background:linear-gradient(90deg,var(--amber),var(--pink));border-radius:6px;transition:width 1s;box-shadow:0 0 10px rgba(253,203,110,0.4)"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <div class="tag tag-p">6 Day Streak 🔥</div>
+      <div class="tag tag-g">83% Rate</div>
+      <div class="tag tag-a">5 Perfect Days</div>
+    </div>
+  </div>
+
+  <!-- Habit cards -->
+  <div class="habit-grid" id="habit-cards-container"></div>
+
+  <!-- Heatmap -->
+  <div class="chart-panel">
+    <div class="cp-header"><div class="cp-title"><i class="ti ti-calendar-week"></i> 15-Week Consistency Heatmap</div></div>
+    <div id="habit-heatmap" style="display:flex;gap:10px;align-items:flex-start;padding-bottom:4px;overflow-x:auto"></div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     GOALS
+────────────────────────────────── -->
+<section class="page" id="page-goals">
+  <div class="page-header">
+    <div class="ph-left"><h1>Goals OS 🎯</h1><p>Strategic milestones. AI-powered clarity.</p></div>
+    <div class="ph-right">
+      <button class="btn btn-ghost"><i class="ti ti-layout-grid"></i> Vision Board</button>
+      <button class="btn btn-purple"><i class="ti ti-plus"></i> New Goal</button>
+    </div>
+  </div>
+
+  <!-- AI risk alert -->
+  <div style="background:rgba(253,203,110,0.06);border:1px solid rgba(253,203,110,0.2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+    <div style="width:28px;height:28px;border-radius:8px;background:rgba(253,203,110,0.15);display:flex;align-items:center;justify-content:center;color:var(--amber);flex-shrink:0"><i class="ti ti-alert-triangle" style="font-size:14px"></i></div>
     <div>
-      <div class="page-title">Good morning, {{ request.user.first_name|default:request.user.username }}</div>
-      <div class="page-sub">Here's your productivity snapshot for today</div>
+      <div style="font-size:12.5px;font-weight:500;color:var(--text)">AI Risk Detection</div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:2px">"Learn Rust" goal is at risk — <strong style="color:var(--amber)">45% completion probability</strong> given current velocity. AI recommends 45 min/day for 3 weeks.</div>
     </div>
-
-    <!-- SCORE CARDS -->
-    <div class="score-grid">
-      <div class="score-card habit">
-        <div class="score-label"><i class="ti ti-repeat"></i> Habit Score</div>
-        <div class="score-val">{{ scores.habit_score }}</div>
-        <div class="score-bar"><div class="score-bar-fill" style="width: {{ scores.habit_score }}%"></div></div>
-      </div>
-      <div class="score-card finance">
-        <div class="score-label"><i class="ti ti-wallet"></i> Finance Score</div>
-        <div class="score-val">{{ scores.finance_score }}</div>
-        <div class="score-bar"><div class="score-bar-fill" style="width: {{ scores.finance_score }}%"></div></div>
-      </div>
-      <div class="score-card goal">
-        <div class="score-label"><i class="ti ti-target"></i> Goal Score</div>
-        <div class="score-val">{{ scores.goal_score }}</div>
-        <div class="score-bar"><div class="score-bar-fill" style="width: {{ scores.goal_score }}%"></div></div>
-      </div>
-      <div class="score-card overall">
-        <div class="score-label"><i class="ti ti-star"></i> Overall Score</div>
-        <div class="score-val">{{ scores.overall_score }}</div>
-        <div class="score-bar"><div class="score-bar-fill" style="width: {{ scores.overall_score }}%"></div></div>
-      </div>
-    </div>
-
-    <!-- CHART + AI -->
-    <div class="two-col">
-      <div class="panel">
-        <div class="panel-title"><i class="ti ti-chart-bar"></i> Weekly Productivity</div>
-        <div class="chart-wrap">
-          <canvas id="chart"></canvas>
-        </div>
-      </div>
-      <div class="ai-panel">
-        <div class="ai-badge"><i class="ti ti-brain"></i> AI Insight</div>
-        <div class="ai-text">{{ ai_briefing }}</div>
-      </div>
-    </div>
-
-    <!-- ACTIVITY FEED -->
-    <div class="panel">
-      <div class="panel-title"><i class="ti ti-activity"></i> Recent Activity</div>
-      <div class="activity-list">
-        {% for event in recent_events %}
-        <div class="activity-item">
-          <div class="activity-dot"></div>
-          <div class="activity-text"><strong>{{ event.event_type }}</strong> — {{ event.metadata }}</div>
-          <div class="activity-time">{{ event.timestamp|date:"H:i" }}</div>
-        </div>
-        {% empty %}
-        <div class="empty">No recent activity yet.</div>
-        {% endfor %}
-      </div>
-    </div>
-
+    <button class="btn btn-ghost" style="flex-shrink:0;font-size:11px">Fix Now</button>
   </div>
+
+  <!-- Goal list -->
+  <div class="goal-list" id="goal-list-container"></div>
+
+  <!-- Goal chart -->
+  <div class="chart-panel">
+    <div class="cp-header"><div class="cp-title"><i class="ti ti-trending-up"></i> Goal Velocity Tracker</div></div>
+    <div class="chart-wrap h180"><canvas id="chart-goals" role="img" aria-label="Goal velocity chart">Goal progress velocity.</canvas></div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     FINANCE
+────────────────────────────────── -->
+<section class="page" id="page-finance">
+  <div class="page-header">
+    <div class="ph-left"><h1>Finance Intelligence 💰</h1><p>Wealth tracking, reimagined.</p></div>
+    <div class="ph-right">
+      <div class="chip ai"><div class="pulse-dot"></div>AI Analyzing</div>
+      <button class="btn btn-purple"><i class="ti ti-plus"></i> Log Transaction</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="fin-stat-grid">
+    <div class="fin-stat"><div class="fin-label">Finance Score</div><div class="fin-val" style="color:var(--green)">91</div><div class="fin-sub">↑ +1.4 from yesterday</div></div>
+    <div class="fin-stat"><div class="fin-label">Monthly Savings</div><div class="fin-val" style="color:var(--cyan)">₹18,400</div><div class="fin-sub">of ₹25,000 goal</div></div>
+    <div class="fin-stat"><div class="fin-label">Spent This Month</div><div class="fin-val" style="color:var(--amber)">₹31,200</div><div class="fin-sub">76% of budget</div></div>
+    <div class="fin-stat"><div class="fin-label">Budget Health</div><div class="fin-val" style="color:var(--green)">🟢 Good</div><div class="fin-sub">₹9,800 remaining</div></div>
+    <div class="fin-stat"><div class="fin-label">Subscriptions</div><div class="fin-val" style="color:var(--pink)">₹2,340</div><div class="fin-sub">6 active subs</div></div>
+    <div class="fin-stat"><div class="fin-label">Wealth Score</div><div class="fin-val" style="color:var(--purple)">Top 8%</div><div class="fin-sub">vs peers</div></div>
+  </div>
+
+  <!-- Chart + Transactions -->
+  <div class="grid-6-4">
+    <div class="chart-panel">
+      <div class="cp-header">
+        <div class="cp-title"><i class="ti ti-chart-area"></i> Income vs Expense (6mo)</div>
+        <div class="cp-legend">
+          <div class="cp-leg-item"><div class="cp-leg-dot" style="background:var(--green)"></div>Income</div>
+          <div class="cp-leg-item"><div class="cp-leg-dot" style="background:var(--red)"></div>Expense</div>
+        </div>
+      </div>
+      <div class="chart-wrap h240"><canvas id="chart-finance" role="img" aria-label="Income vs expense chart">6-month income vs expense.</canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="cp-header"><div class="cp-title"><i class="ti ti-chart-donut"></i> Spending Categories</div></div>
+      <div class="chart-wrap h240"><canvas id="chart-spending" role="img" aria-label="Spending categories donut">Spending breakdown by category.</canvas></div>
+    </div>
+  </div>
+
+  <!-- Transactions -->
+  <div class="chart-panel">
+    <div class="cp-header"><div class="cp-title"><i class="ti ti-receipt"></i> Recent Transactions</div><div class="chip ai"><i class="ti ti-sparkles" style="font-size:11px"></i> AI categorized</div></div>
+    <div class="tx-list" id="tx-list-container"></div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     STUDY PLANNER
+────────────────────────────────── -->
+<section class="page" id="page-study">
+  <div class="page-header">
+    <div class="ph-left"><h1>Study Planner 📚</h1><p>Adaptive AI learning sessions.</p></div>
+    <div class="ph-right">
+      <button class="btn btn-purple"><i class="ti ti-plus"></i> Add Subject</button>
+    </div>
+  </div>
+
+  <div class="grid-6-4">
+    <div>
+      <!-- Subjects -->
+      <div class="chart-panel" style="margin-bottom:14px">
+        <div class="cp-header"><div class="cp-title"><i class="ti ti-books"></i> Subjects</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="subject-list"></div>
+      </div>
+      <!-- Study analytics -->
+      <div class="chart-panel">
+        <div class="cp-header"><div class="cp-title"><i class="ti ti-chart-bar"></i> Weekly Study Hours</div></div>
+        <div class="chart-wrap h160"><canvas id="chart-study" role="img" aria-label="Weekly study hours bar chart">Study hours per day.</canvas></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- Pomodoro -->
+      <div class="pomodoro">
+        <div class="pomo-label">Focus Session</div>
+        <div class="pomo-time" id="pomo-display">25:00</div>
+        <div style="font-size:11px;color:var(--muted)">Pomodoro #3 of 4</div>
+        <div class="pomo-controls">
+          <button class="pomo-btn" style="background:linear-gradient(135deg,var(--purple2),var(--cyan));color:#fff" onclick="togglePomo()">Start</button>
+          <button class="pomo-btn" style="background:var(--bg3);border:1px solid var(--border2);color:var(--muted)">Reset</button>
+        </div>
+      </div>
+
+      <!-- Exam countdown -->
+      <div class="chart-panel">
+        <div class="cp-header"><div class="cp-title"><i class="ti ti-alarm"></i> Exam Countdowns</div></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">System Design</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">June 15</div></div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--red)">35d</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">DSA Round</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">July 2</div></div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">52d</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px">
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">Rust Certification</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">Aug 20</div></div>
+            <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--green)">101d</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     CALENDAR
+────────────────────────────────── -->
+<section class="page" id="page-calendar">
+  <div class="page-header">
+    <div class="ph-left"><h1>Smart Calendar 📅</h1><p>AI-assisted time intelligence.</p></div>
+    <div class="ph-right">
+      <div class="chip ai"><i class="ti ti-sparkles" style="font-size:11px"></i>AI scheduled</div>
+      <button class="btn btn-purple"><i class="ti ti-plus"></i> New Event</button>
+    </div>
+  </div>
+
+  <div class="grid-6-4">
+    <div class="chart-panel">
+      <div class="cp-header">
+        <div class="cp-title"><i class="ti ti-calendar"></i> May 2025</div>
+        <div style="display:flex;gap:6px">
+          <button class="tb-btn"><i class="ti ti-chevron-left"></i></button>
+          <button class="tb-btn"><i class="ti ti-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-day-header">MON</div><div class="cal-day-header">TUE</div>
+        <div class="cal-day-header">WED</div><div class="cal-day-header">THU</div>
+        <div class="cal-day-header">FRI</div><div class="cal-day-header">SAT</div>
+        <div class="cal-day-header">SUN</div>
+      </div>
+      <div class="cal-grid" id="cal-grid-days"></div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+        <div class="cal-event" style="background:rgba(162,155,254,0.1);border-color:rgba(162,155,254,0.25);color:var(--purple)">09:00 — Deep Work Block (3h)</div>
+        <div class="cal-event" style="background:rgba(0,210,160,0.1);border-color:rgba(0,210,160,0.25);color:var(--green)">13:00 — System Design Study</div>
+        <div class="cal-event" style="background:rgba(253,121,168,0.1);border-color:rgba(253,121,168,0.25);color:var(--pink)">18:00 — Gym Session</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="ai-card">
+        <div class="ai-header"><div class="ai-pill"><div class="pulse-dot"></div>AI Scheduling</div></div>
+        <div class="ai-text">Your peak focus window is <strong>9am–12pm</strong>. I've blocked this for deep work. Meetings moved to <strong>2–4pm</strong> when energy dips.</div>
+        <div class="ai-divider"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-purple" style="flex:1;font-size:11px;justify-content:center">Apply Schedule</button>
+          <button class="btn btn-ghost" style="font-size:11px">Adjust</button>
+        </div>
+      </div>
+
+      <div class="chart-panel">
+        <div class="cp-header"><div class="cp-title"><i class="ti ti-clock"></i> Today's Focus Blocks</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(162,155,254,0.06);border:1px solid rgba(162,155,254,0.15);border-radius:8px">
+            <div style="width:3px;height:32px;border-radius:2px;background:var(--purple);flex-shrink:0"></div>
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">Deep Work</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">09:00 – 12:00 · 3h</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,210,160,0.06);border:1px solid rgba(0,210,160,0.15);border-radius:8px">
+            <div style="width:3px;height:32px;border-radius:2px;background:var(--green);flex-shrink:0"></div>
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">Study Block</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">13:00 – 15:00 · 2h</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(253,203,110,0.06);border:1px solid rgba(253,203,110,0.15);border-radius:8px">
+            <div style="width:3px;height:32px;border-radius:2px;background:var(--amber);flex-shrink:0"></div>
+            <div><div style="font-size:12px;font-weight:500;color:var(--text)">Review / Plan</div><div style="font-size:10px;color:var(--dim);font-family:'DM Mono',monospace">19:00 – 20:00 · 1h</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     DAILY BRIEFING
+────────────────────────────────── -->
+<section class="page" id="page-briefing">
+  <div class="page-header">
+    <div class="ph-left"><h1>Daily AI Briefing ✨</h1><p>Your intelligent morning debrief</p></div>
+    <div class="ph-right"><div class="chip ai"><div class="pulse-dot"></div>Generated 6:00 AM</div></div>
+  </div>
+
+  <!-- Briefing hero -->
+  <div class="briefing-hero">
+    <div class="bh-bg-glow"></div>
+    <div class="ai-pill" style="margin-bottom:12px"><div class="pulse-dot"></div>AI Briefing — May 11, 2025</div>
+    <div class="bh-title">Today's Productivity Analysis</div>
+    <div class="bh-sub">Good morning Meenakshi. Based on your <strong style="color:var(--text)">last 30 days of activity</strong>, today is projected to be a <strong style="color:var(--purple)">high-performance day</strong>. Your circadian peak aligns with your scheduled deep work block.</div>
+    <div class="bh-insights">
+      <div class="insight-item"><i class="ti ti-repeat"></i>Habit score <strong style="color:var(--purple)">82/100</strong> — great consistency. Morning routine streak is 6 days. Complete gym habit before noon to maintain momentum.</div>
+      <div class="insight-item"><i class="ti ti-wallet"></i>Finance score <strong style="color:var(--green)">91/100</strong> — exceptional discipline this week. You're 73% toward your ₹25,000 savings goal. On track.</div>
+      <div class="insight-item"><i class="ti ti-target"></i>Goal score <strong style="color:var(--pink)">68/100</strong> — "Learn Rust" needs attention. Recommend 45 min/day this week to hit your Jan deadline.</div>
+      <div class="insight-item"><i class="ti ti-heart-rate-monitor"></i>Burnout risk is <strong style="color:var(--green)">12% (Low)</strong>. Recovery score excellent. Energy forecast: high for AM, moderate post-lunch.</div>
+    </div>
+  </div>
+
+  <!-- AI Logic explainer -->
+  <div class="logic-wrap">
+    <div class="logic-title"><i class="ti ti-circuit-cell" style="color:var(--purple);font-size:18px"></i>How AI Insights Are Generated</div>
+    <div class="logic-sub">LifeOS AI uses a <strong style="color:var(--text)">hybrid pipeline</strong> — deterministic rules feed a weighted scoring model, whose output drives a template-grounded language generation layer. No hallucinations. Every insight is traceable.</div>
+
+    <div class="pipeline">
+      <div class="pipe-step"><span class="pipe-ico">📥</span><div class="pipe-name">Raw Events</div><div class="pipe-desc">Habits, goals, transactions logged via API</div></div>
+      <div class="pipe-step"><span class="pipe-ico">📐</span><div class="pipe-name">Rule Engine</div><div class="pipe-desc">Deterministic formulas compute per-module scores</div></div>
+      <div class="pipe-step"><span class="pipe-ico">⚖️</span><div class="pipe-name">Weighted Model</div><div class="pipe-desc">Configurable weights blend into overall score</div></div>
+      <div class="pipe-step"><span class="pipe-ico">📊</span><div class="pipe-name">Anomaly Layer</div><div class="pipe-desc">Statistical deviation triggers smart alerts</div></div>
+      <div class="pipe-step"><span class="pipe-ico">💬</span><div class="pipe-name">Briefing</div><div class="pipe-desc">Natural-language output rendered to dashboard</div></div>
+    </div>
+
+    <div class="logic-cards">
+      <div class="logic-card">
+        <div class="lc-head"><div class="lc-icon rule"><i class="ti ti-ruler-2"></i></div><div class="lc-title">Rule-Based Scoring</div></div>
+        <div class="lc-body">Each module uses explicit, auditable formulas. Habit module computes:<br><br><code>score = (completed/total) × 100 × streak_bonus</code><br><br>Every score traces to a specific user action. No black-box inference.</div>
+      </div>
+      <div class="logic-card">
+        <div class="lc-head"><div class="lc-icon ml"><i class="ti ti-brain"></i></div><div class="lc-title">Statistical Insight Layer</div></div>
+        <div class="lc-body">Compares today's score against rolling 7-day mean (μ) and standard deviation (σ).<br><br>If <code>score &lt; μ − σ</code> → corrective insight fires.<br>If <code>score &gt; μ + σ</code> → positive reinforcement fires.</div>
+      </div>
+      <div class="logic-card">
+        <div class="lc-head"><div class="lc-icon weight"><i class="ti ti-adjustments-horizontal"></i></div><div class="lc-title">Score Weights</div></div>
+        <div class="lc-body">Overall score = configurable weighted average:</div>
+        <div class="weight-bars">
+          <div class="wb-row"><div class="wb-label">Habit</div><div class="wb-track"><div class="wb-fill" data-w="40" style="width:0%;background:var(--purple)"></div></div><div class="wb-pct">40%</div></div>
+          <div class="wb-row"><div class="wb-label">Finance</div><div class="wb-track"><div class="wb-fill" data-w="30" style="width:0%;background:var(--green)"></div></div><div class="wb-pct">30%</div></div>
+          <div class="wb-row"><div class="wb-label">Goal</div><div class="wb-track"><div class="wb-fill" data-w="30" style="width:0%;background:var(--pink)"></div></div><div class="wb-pct">30%</div></div>
+        </div>
+      </div>
+      <div class="logic-card">
+        <div class="lc-head"><div class="lc-icon trigger"><i class="ti ti-bolt"></i></div><div class="lc-title">Trigger Conditions</div></div>
+        <div class="lc-body">Insights fire deterministically on thresholds:<br><br>• <code>habit &lt; 70</code> → "Complete 3 habits before noon"<br>• <code>finance ≥ 90</code> → "Exceptional discipline"<br>• <code>goal &lt; 60</code> → "Dedicate 30 min to top goal"<br>• <code>overall &gt; 80</code> → "Top 10% — maintain streak"</div>
+      </div>
+    </div>
+
+    <div class="logic-note"><strong>Why this architecture?</strong> For a personal productivity OS, explainability matters more than raw ML accuracy. Users need to understand <em>why</em> they got a score to act on it. The rule-based core ensures every insight is auditable, while the statistical anomaly layer adds adaptive personalisation without requiring training data.</div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     FOCUS MODE
+────────────────────────────────── -->
+<section class="page" id="page-focus">
+  <div class="page-header">
+    <div class="ph-left"><h1>Focus Mode 🎯</h1><p>Enter deep work. Block distractions. Execute.</p></div>
+  </div>
+
+  <div class="focus-hero">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(162,155,254,0.08),transparent 60%);pointer-events:none"></div>
+    <div class="focus-label">Current Session</div>
+    <div class="focus-timer-display" id="focus-timer">25:00</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:-10px;margin-bottom:10px">Deep Work Block · Pomodoro 1 of 4</div>
+    <div style="height:3px;width:300px;background:rgba(255,255,255,0.06);border-radius:3px;margin-bottom:24px">
+      <div style="height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:3px;transition:width 0.5s" id="focus-progress"></div>
+    </div>
+    <div class="focus-controls">
+      <button class="focus-btn primary" onclick="toggleFocusTimer()">▶ Start Session</button>
+      <button class="focus-btn ghost" onclick="resetFocus()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-tile"><div class="st-label">Today's Focus</div><div class="st-val" style="color:var(--cyan)">3h 20m</div><div class="st-sub">4 sessions completed</div></div>
+    <div class="stat-tile"><div class="st-label">This Week</div><div class="st-val" style="color:var(--purple)">21.4h</div><div class="st-sub">↑ +2.1h vs last week</div></div>
+    <div class="stat-tile"><div class="st-label">Best Streak</div><div class="st-val" style="color:var(--amber)">6 sessions</div><div class="st-sub">on April 28</div></div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="cp-header"><div class="cp-title"><i class="ti ti-clock"></i> Focus Hours This Week</div></div>
+    <div class="chart-wrap h180"><canvas id="chart-focus" role="img" aria-label="Focus hours bar chart">Daily focus hours this week.</canvas></div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────
+     ACTIVITY FEED
+────────────────────────────────── -->
+<section class="page" id="page-feed">
+  <div class="page-header">
+    <div class="ph-left"><h1>Activity Feed</h1><p>Every action, in chronological order</p></div>
+    <div class="ph-right"><div class="chip live"><div class="live-dot"></div>Live</div></div>
+  </div>
+
+  <div class="chart-panel">
+    <div class="cp-header"><div class="cp-title"><i class="ti ti-activity"></i> Recent Events</div></div>
+    <div class="timeline" id="feed-timeline"></div>
+  </div>
+</section>
+
+</main><!-- /content -->
+</div><!-- /shell -->
+
+<!-- ══════════════════════════════════════
+     NOTIFICATION PANEL
+══════════════════════════════════════ -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <div class="notif-title">Notifications</div>
+    <button class="notif-close" onclick="toggleNotif()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--purple)"></div><div><div class="notif-body"><strong>AI Insight Ready</strong> — Your weekly review is generated</div><div class="notif-time">2 min ago</div></div></div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--amber)"></div><div><div class="notif-body"><strong>Goal Alert</strong> — "Learn Rust" falling behind velocity target</div><div class="notif-time">18 min ago</div></div></div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--green)"></div><div><div class="notif-body"><strong>Habit Completed</strong> — Morning Run ✓ +50 XP</div><div class="notif-time">1h ago</div></div></div>
+  <div class="notif-item"><div class="notif-dot" style="background:var(--cyan)"></div><div><div class="notif-body"><strong>Finance Score</strong> jumped to 91 — new personal best!</div><div class="notif-time">3h ago</div></div></div>
 </div>
 
+<!-- ══════════════════════════════════════
+     AI COPILOT
+══════════════════════════════════════ -->
+<div class="copilot">
+  <div class="copilot-chat" id="copilot-chat">
+    <div class="cc-header">
+      <div class="cc-avatar">🧠</div>
+      <div>
+        <div class="cc-title">LifeOS Copilot</div>
+        <div class="cc-sub">● Online</div>
+      </div>
+      <button class="cc-close" onclick="toggleCopilot()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cc-messages" id="cc-messages">
+      <div class="cc-msg ai">Hey Meenakshi! Your productivity score is <strong>78.4</strong> today — you're in the top 12%. What would you like to focus on? 🚀</div>
+      <div class="cc-msg ai">Quick wins available: complete your gym habit (+50 XP) and spend 45 min on Rust (+goal velocity).</div>
+    </div>
+    <div class="cc-input">
+      <input type="text" id="cc-input" placeholder="Ask anything…" onkeydown="handleChat(event)">
+      <button class="cc-send" onclick="sendChat()"><i class="ti ti-send" style="font-size:13px"></i></button>
+    </div>
+  </div>
+  <button class="copilot-btn" onclick="toggleCopilot()"><i class="ti ti-sparkles"></i></button>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
 <script>
-const ctx = document.getElementById('chart').getContext('2d');
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-    datasets: [{
-      label: 'Productivity Score',
-      data: [65, 70, 75, 60, 80, 76, {{ scores.overall_score }}],
-      backgroundColor: 'rgba(56,189,248,0.12)',
-      borderColor: '#38bdf8',
-      borderWidth: 1.5,
-      borderRadius: 5,
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        grid: { color: 'rgba(255,255,255,0.04)' },
-        ticks: { color: '#475569', font: { size: 11, family: 'DM Sans' } }
-      },
-      y: {
-        grid: { color: 'rgba(255,255,255,0.04)' },
-        ticks: { color: '#475569', font: { size: 11, family: 'DM Sans' } },
-        min: 0, max: 100
+/* ── GLOBAL CHART DEFAULTS ── */
+const TIP={backgroundColor:'#0b0b18',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,titleColor:'#e8e6f8',bodyColor:'#6b6a90',padding:10,cornerRadius:8};
+const GRID={color:'rgba(255,255,255,0.035)'};
+const TICK={color:'#3d3c5a',font:{size:10,family:"'DM Mono',monospace"}};
+function scale(mn=0,mx=100){return{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:TICK,min:mn,max:mx}}}
+
+/* ══════════════════════════════════
+   MOCK DATA
+══════════════════════════════════ */
+const SCORES={habit:82,finance:91,goal:68,overall:78};
+
+const ACTIVITIES=[
+  {type:'h',icon:'ti-repeat',name:'Morning Run completed',meta:'habit_completed · streak: 6 days',time:'07:24',color:'purple'},
+  {type:'f',icon:'ti-wallet',name:'Finance score updated',meta:'finance_score: 91 · +1.4 delta',time:'08:00',color:'green'},
+  {type:'g',icon:'ti-target',name:'Goal progress: Build SaaS',meta:'goal_updated · progress: 67%',time:'09:15',color:'pink'},
+  {type:'h',icon:'ti-repeat',name:'Meditation completed',meta:'habit_completed · streak: 4 days',time:'10:30',color:'purple'},
+  {type:'f',icon:'ti-receipt',name:'Zomato — ₹340',meta:'transaction_created · category: Food',time:'12:45',color:'green'},
+  {type:'a',icon:'ti-brain',name:'AI Briefing generated',meta:'ai_briefing · 4 insights · score 78',time:'06:00',color:'amber'},
+  {type:'g',icon:'ti-target',name:'Goal progress: Learn Rust',meta:'goal_updated · progress: 29%',time:'14:00',color:'pink'},
+  {type:'h',icon:'ti-repeat',name:'Reading 30 min completed',meta:'habit_completed · streak: 8 days',time:'21:30',color:'purple'},
+];
+
+const GOALS=[
+  {title:'Build SaaS Product',progress:67,color:'var(--purple)',deadline:'Dec 2025',ai:78,category:'Work',status:'On Track'},
+  {title:'Reach 80kg Body Weight',progress:43,color:'var(--green)',deadline:'Oct 2025',ai:62,category:'Health',status:'Behind'},
+  {title:'Save ₹5,00,000',progress:81,color:'var(--amber)',deadline:'Mar 2026',ai:91,category:'Finance',status:'Ahead'},
+  {title:'Learn Rust Programming',progress:29,color:'var(--cyan)',deadline:'Jan 2026',ai:45,category:'Learning',status:'At Risk'},
+];
+
+const HABITS=[
+  {name:'Morning Run 🏃',streak:6,completion:83,done:true},
+  {name:'Meditation 🧘',streak:4,completion:71,done:true},
+  {name:'Cold Shower 🚿',streak:12,completion:92,done:false},
+  {name:'Reading 30m 📚',streak:8,completion:88,done:true},
+  {name:'Gym Workout 💪',streak:3,completion:60,done:false},
+  {name:'Coding 2h+ 💻',streak:6,completion:77,done:true},
+];
+
+const TRANSACTIONS=[
+  {name:'Swiggy',cat:'Food',date:'May 11, 12:45',amt:'₹480',type:'debit',icon:'ti-building-store',color:'rgba(253,121,168,0.1)',ic:'var(--pink)'},
+  {name:'Salary Credit',cat:'Income',date:'May 10, 00:00',amt:'+₹65,000',type:'credit',icon:'ti-building-bank',color:'rgba(0,210,160,0.1)',ic:'var(--green)'},
+  {name:'Netflix',cat:'Subscription',date:'May 9, 10:00',amt:'₹649',type:'debit',icon:'ti-device-tv',color:'rgba(248,113,113,0.1)',ic:'var(--red)'},
+  {name:'Zepto',cat:'Groceries',date:'May 9, 08:30',amt:'₹1,240',type:'debit',icon:'ti-shopping-cart',color:'rgba(96,165,250,0.1)',ic:'var(--blue)'},
+  {name:'Freelance Payment',cat:'Income',date:'May 8, 18:00',amt:'+₹12,000',type:'credit',icon:'ti-briefcase',color:'rgba(0,210,160,0.1)',ic:'var(--green)'},
+];
+
+const SUBJECTS=[
+  {name:'System Design',hours:8.5,target:10,color:'var(--purple)'},
+  {name:'Data Structures',hours:12,target:15,color:'var(--cyan)'},
+  {name:'Rust Programming',hours:5,target:20,color:'var(--amber)'},
+  {name:'Machine Learning',hours:3,target:8,color:'var(--pink)'},
+];
+
+/* ══════════════════════════════════
+   RENDER FUNCTIONS
+══════════════════════════════════ */
+function renderActivities(){
+  const c=document.getElementById('dash-activity');
+  if(!c)return;
+  c.innerHTML=ACTIVITIES.slice(0,5).map(a=>`
+    <div class="act-item">
+      <div class="act-ico ${a.type}"><i class="ti ${a.icon}"></i></div>
+      <div class="act-body">
+        <div class="act-name">${a.name}</div>
+        <div class="act-meta">${a.meta}</div>
+      </div>
+      <div class="act-time">${a.time}</div>
+    </div>`).join('');
+}
+
+function renderGoals(){
+  const c=document.getElementById('goal-list-container');
+  if(!c)return;
+  c.innerHTML=GOALS.map(g=>{
+    const statusColor=g.status==='At Risk'?'rgba(248,113,113,0.15),var(--red)':g.status==='Behind'?'rgba(253,203,110,0.15),var(--amber)':'rgba(0,210,160,0.15),var(--green)';
+    const [bg,fc]=statusColor.split(',');
+    return`<div class="goal-card">
+      <div class="gc-top">
+        <div class="gc-info">
+          <div class="gc-name">${g.title}</div>
+          <div class="gc-meta">${g.category} · Due ${g.deadline}</div>
+        </div>
+        <div class="gc-right">
+          <div class="gc-pct" style="color:${g.color}">${g.progress}%</div>
+          <div class="gc-ai" style="color:var(--muted)">AI: ${g.ai}% prob</div>
+        </div>
+      </div>
+      <div class="gc-bar"><div class="gc-fill" style="width:${g.progress}%;background:${g.color}"></div></div>
+      <div class="gc-foot">
+        <div class="gc-status">${g.progress}/100 complete</div>
+        <div class="gc-badge" style="background:${bg};color:${fc}">${g.status}</div>
+      </div>
+    </div>`;}).join('');
+}
+
+function renderHabits(){
+  const c=document.getElementById('habit-cards-container');
+  if(!c)return;
+  c.innerHTML=HABITS.map(h=>`
+    <div class="habit-card">
+      <div class="hc-top">
+        <div class="hc-name">${h.name}</div>
+        <div class="hc-streak"><i class="ti ti-flame"></i>${h.streak}d</div>
+      </div>
+      <div class="hc-bar"><div class="hc-fill" style="width:${h.completion}%"></div></div>
+      <div class="hc-meta">${h.completion}% completion rate</div>
+      <div class="hc-check ${h.done?'done':''}" onclick="this.classList.toggle('done')">
+        ${h.done?'<i class="ti ti-check"></i>':''}
+      </div>
+    </div>`).join('');
+}
+
+function renderTransactions(){
+  const c=document.getElementById('tx-list-container');
+  if(!c)return;
+  c.innerHTML=TRANSACTIONS.map(t=>`
+    <div class="tx-item">
+      <div class="tx-ico" style="background:${t.color};color:${t.ic}"><i class="ti ${t.icon}"></i></div>
+      <div class="tx-info">
+        <div class="tx-name">${t.name}</div>
+        <div class="tx-date">${t.cat} · ${t.date}</div>
+      </div>
+      <div class="tx-amt ${t.type}">${t.amt}</div>
+    </div>`).join('');
+}
+
+function renderFeed(){
+  const c=document.getElementById('feed-timeline');
+  if(!c)return;
+  c.innerHTML=ACTIVITIES.map(a=>`
+    <div class="tl-item">
+      <div class="tl-dot ${a.type}"><i class="ti ${a.icon}" style="font-size:10px"></i></div>
+      <div class="tl-body">
+        <div class="tl-type">${a.name}</div>
+        <div class="tl-meta">${a.meta}</div>
+        <div class="tl-time">May 11, 2025 · ${a.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderSubjects(){
+  const c=document.getElementById('subject-list');
+  if(!c)return;
+  c.innerHTML=SUBJECTS.map(s=>{const p=Math.round(s.hours/s.target*100);return`
+    <div class="subject-card">
+      <div class="sub-name">${s.name}</div>
+      <div class="sub-meta">${s.hours}h studied / ${s.target}h target</div>
+      <div class="sub-bar"><div class="sub-fill" style="width:${p}%;background:${s.color}"></div></div>
+      <div class="sub-pct" style="color:${s.color}">${p}%</div>
+    </div>`;}).join('');
+}
+
+function renderHeatmaps(){
+  ['heatmap-container','habit-heatmap'].forEach(id=>{
+    const c=document.getElementById(id);
+    if(!c)return;
+    const days=['M','T','W','T','F','S','S'];
+    const weeks=15;
+    let html='<div class="hm-days">'+days.map(d=>`<div class="hm-day">${d}</div>`).join('')+'</div>';
+    for(let w=0;w<weeks;w++){
+      html+='<div class="hm-col">';
+      for(let d=0;d<7;d++){
+        const v=Math.random();
+        const lvl=v<0.15?'':v<0.4?'l1':v<0.65?'l2':v<0.85?'l3':'l4';
+        html+=`<div class="hm-cell ${lvl}"></div>`;
       }
+      html+='</div>';
     }
+    c.innerHTML=html;
+  });
+}
+
+function renderCalendar(){
+  const c=document.getElementById('cal-grid-days');
+  if(!c)return;
+  const today=11;
+  const days=[29,30,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,1,2,3];
+  const events=[3,7,11,15,18,22,27];
+  const otherMonth=[0,1];
+  const endOther=[33,34,35];
+  c.innerHTML=days.map((d,i)=>{
+    const isToday=d===today&&!otherMonth.includes(i)&&!endOther.includes(i);
+    const hasEv=events.includes(d)&&!otherMonth.includes(i);
+    const isOther=otherMonth.includes(i)||endOther.includes(i);
+    return`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}${isOther?' other-month':''}">${d}</div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════
+   CHARTS
+══════════════════════════════════ */
+let chartsInit={dashboard:false,analytics:false,habits:false,goals:false,finance:false,study:false,focus:false};
+
+function initDashboardCharts(){
+  if(chartsInit.dashboard)return;chartsInit.dashboard=true;
+
+  /* Weekly bar */
+  new Chart(document.getElementById('chart-weekly'),{
+    type:'bar',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Today'],
+      datasets:[{
+        data:[65,70,75,60,80,72,78],
+        backgroundColor:(ctx)=>ctx.dataIndex===6?'rgba(162,155,254,0.4)':'rgba(162,155,254,0.1)',
+        borderColor:(ctx)=>ctx.dataIndex===6?'#a29bfe':'rgba(162,155,254,0.3)',
+        borderWidth:1.5,borderRadius:7,borderSkipped:false,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:TIP},scales:scale(50,100)}
+  });
+
+  /* Radar */
+  new Chart(document.getElementById('chart-radar'),{
+    type:'radar',
+    data:{
+      labels:['Habit','Finance','Goal','Focus','Sleep','Social'],
+      datasets:[{
+        label:'You',data:[82,91,68,74,80,55],
+        borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,0.1)',
+        borderWidth:2,pointBackgroundColor:'#a29bfe',pointRadius:4,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1000},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},angleLines:{color:'rgba(255,255,255,0.05)'},
+        pointLabels:{color:'#6b6a90',font:{size:10}},ticks:{display:false}}}}
+  });
+}
+
+function initAnalyticsCharts(){
+  if(chartsInit.analytics)return;chartsInit.analytics=true;
+
+  /* 4-week multi-line */
+  const seed=(base,spread)=>[base-spread-5,base-spread,base-spread/2,base].map(v=>Math.round(v));
+  new Chart(document.getElementById('chart-multiline'),{
+    type:'line',
+    data:{
+      labels:['Week 1','Week 2','Week 3','Week 4'],
+      datasets:[
+        {label:'Habit',data:seed(82,12),borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,0.06)',borderWidth:2,tension:0.4,pointRadius:4,pointBackgroundColor:'#a29bfe',fill:true},
+        {label:'Finance',data:seed(91,6),borderColor:'#00d2a0',backgroundColor:'rgba(0,210,160,0.06)',borderWidth:2,tension:0.4,pointRadius:4,pointBackgroundColor:'#00d2a0',fill:true},
+        {label:'Goal',data:seed(68,18),borderColor:'#fd79a8',backgroundColor:'rgba(253,121,168,0.06)',borderWidth:2,tension:0.4,pointRadius:4,pointBackgroundColor:'#fd79a8',fill:true},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1000,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:TIP},scales:scale(40,100)}
+  });
+
+  /* Radar 2 */
+  new Chart(document.getElementById('chart-radar2'),{
+    type:'radar',
+    data:{
+      labels:['Habit','Finance','Goal','Focus','Sleep','Social'],
+      datasets:[{label:'You',data:[82,91,68,74,80,55],borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,0.1)',borderWidth:2,pointBackgroundColor:'#a29bfe',pointRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1000},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{r:{min:0,max:100,grid:{color:'rgba(255,255,255,0.05)'},angleLines:{color:'rgba(255,255,255,0.05)'},
+        pointLabels:{color:'#6b6a90',font:{size:10}},ticks:{display:false}}}}
+  });
+
+  /* Burnout */
+  const bData=Array.from({length:14},(_,i)=>Math.round(8+Math.random()*12+i*0.4));
+  bData[13]=12;
+  new Chart(document.getElementById('chart-burnout'),{
+    type:'line',
+    data:{
+      labels:Array.from({length:14},(_,i)=>`D${i+1}`),
+      datasets:[{data:bData,borderColor:'#00d2a0',backgroundColor:'rgba(0,210,160,0.06)',borderWidth:2,pointRadius:0,tension:0.4,fill:true}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{x:{grid:GRID,ticks:{...TICK,maxTicksLimit:7}},y:{grid:GRID,ticks:TICK,min:0,max:50}}}
+  });
+
+  /* Breakdown animated bar */
+  new Chart(document.getElementById('chart-breakdown'),{
+    type:'bar',
+    data:{
+      labels:['Habit','Finance','Goal','Overall'],
+      datasets:[{data:[82,91,68,78],
+        backgroundColor:['rgba(162,155,254,0.2)','rgba(0,210,160,0.2)','rgba(253,121,168,0.2)','rgba(253,203,110,0.2)'],
+        borderColor:['#a29bfe','#00d2a0','#fd79a8','#fdcb6e'],
+        borderWidth:1.5,borderRadius:10,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1000,easing:'easeOutBounce'},
+      plugins:{legend:{display:false},tooltip:TIP},scales:scale(0,100)}
+  });
+
+  /* 30-day trend with forecast */
+  const trend30=Array.from({length:30},(_,i)=>Math.round(58+Math.random()*18+i*0.5));
+  trend30[29]=78;
+  const forecast=[null,...Array(25).fill(null),78,79.5,81,83];
+  new Chart(document.getElementById('chart-30d'),{
+    type:'line',
+    data:{
+      labels:Array.from({length:30},(_,i)=>i===29?'Today':`D${i+1}`),
+      datasets:[
+        {label:'Actual',data:trend30,borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,0.08)',borderWidth:2,pointRadius:0,tension:0.4,fill:true},
+        {label:'Forecast',data:forecast,borderColor:'rgba(0,210,255,0.6)',backgroundColor:'rgba(0,210,255,0.04)',borderWidth:1.5,pointRadius:0,tension:0.4,fill:false,borderDash:[4,4]},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1200,easing:'easeOutQuart'},
+      plugins:{legend:{display:false},tooltip:TIP},scales:{x:{grid:GRID,ticks:{...TICK,maxTicksLimit:10}},y:{grid:GRID,ticks:TICK,min:40,max:100}}}
+  });
+
+  /* Time allocation bar */
+  new Chart(document.getElementById('chart-time'),{
+    type:'bar',
+    data:{
+      labels:['Deep Work','Study','Exercise','Meetings','Personal','Sleep'],
+      datasets:[{
+        data:[21,12,5,8,6,49],
+        backgroundColor:['rgba(162,155,254,0.4)','rgba(0,210,255,0.4)','rgba(0,210,160,0.4)','rgba(253,121,168,0.4)','rgba(253,203,110,0.4)','rgba(107,106,144,0.3)'],
+        borderColor:['#a29bfe','#00d2ff','#00d2a0','#fd79a8','#fdcb6e','#6b6a90'],
+        borderWidth:1.5,borderRadius:6,borderSkipped:false,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{x:{grid:GRID,ticks:TICK,max:60},y:{grid:{display:false},ticks:{color:'#6b6a90',font:{size:10,family:"'DM Mono',monospace"}}}}}
+  });
+
+  /* Donut */
+  new Chart(document.getElementById('chart-donut'),{
+    type:'doughnut',
+    data:{
+      labels:['Habit (82)','Finance (91)','Goal (68)'],
+      datasets:[{data:[82,91,68],
+        backgroundColor:['rgba(162,155,254,0.85)','rgba(0,210,160,0.85)','rgba(253,121,168,0.85)'],
+        borderColor:'#07070f',borderWidth:5,hoverOffset:10}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      animation:{animateRotate:true,duration:1000,easing:'easeOutQuart'},
+      plugins:{legend:{labels:{color:'#6b6a90',font:{size:11},padding:14,boxWidth:10,boxHeight:10}},tooltip:TIP}}
+  });
+}
+
+function initGoalChart(){
+  if(chartsInit.goals)return;chartsInit.goals=true;
+  new Chart(document.getElementById('chart-goals'),{
+    type:'line',
+    data:{
+      labels:['W1','W2','W3','W4','W5','W6'],
+      datasets:[
+        {label:'SaaS',data:[20,32,45,54,62,67],borderColor:'#a29bfe',backgroundColor:'rgba(162,155,254,0.06)',borderWidth:2,tension:0.4,pointRadius:3,fill:true},
+        {label:'Weight',data:[10,18,25,31,38,43],borderColor:'#00d2a0',backgroundColor:'rgba(0,210,160,0.06)',borderWidth:2,tension:0.4,pointRadius:3,fill:true},
+        {label:'Savings',data:[40,52,62,70,76,81],borderColor:'#fdcb6e',backgroundColor:'rgba(253,203,110,0.06)',borderWidth:2,tension:0.4,pointRadius:3,fill:true},
+        {label:'Rust',data:[5,9,14,19,25,29],borderColor:'#00d2ff',backgroundColor:'rgba(0,210,255,0.06)',borderWidth:2,tension:0.4,pointRadius:3,fill:true},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},scales:scale(0,100)}
+  });
+}
+
+function initFinanceCharts(){
+  if(chartsInit.finance)return;chartsInit.finance=true;
+  new Chart(document.getElementById('chart-finance'),{
+    type:'bar',
+    data:{
+      labels:['Dec','Jan','Feb','Mar','Apr','May'],
+      datasets:[
+        {label:'Income',data:[58000,61000,55000,68000,65000,77000],backgroundColor:'rgba(0,210,160,0.25)',borderColor:'#00d2a0',borderWidth:1.5,borderRadius:6,borderSkipped:false},
+        {label:'Expense',data:[38000,34000,41000,37000,40000,31200],backgroundColor:'rgba(248,113,113,0.2)',borderColor:'#f87171',borderWidth:1.5,borderRadius:6,borderSkipped:false},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>'₹'+Math.round(v/1000)+'k'},min:0,max:90000}}}
+  });
+  new Chart(document.getElementById('chart-spending'),{
+    type:'doughnut',
+    data:{
+      labels:['Food (28%)','Tech (18%)','Transport (12%)','Subscriptions (8%)','Health (9%)','Other (25%)'],
+      datasets:[{
+        data:[8700,5600,3720,2488,2790,7760],
+        backgroundColor:['rgba(253,121,168,0.8)','rgba(162,155,254,0.8)','rgba(0,210,255,0.8)','rgba(253,203,110,0.8)','rgba(0,210,160,0.8)','rgba(107,106,144,0.6)'],
+        borderColor:'#07070f',borderWidth:4,hoverOffset:8,
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      animation:{animateRotate:true,duration:1000},
+      plugins:{legend:{labels:{color:'#6b6a90',font:{size:10},padding:10,boxWidth:8,boxHeight:8}},tooltip:TIP}}
+  });
+}
+
+function initStudyCharts(){
+  if(chartsInit.study)return;chartsInit.study=true;
+  new Chart(document.getElementById('chart-study'),{
+    type:'bar',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{data:[2.5,3,1.5,4,2,1,0.5],backgroundColor:'rgba(162,155,254,0.2)',borderColor:'#a29bfe',borderWidth:1.5,borderRadius:6,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},scales:scale(0,5)}
+  });
+}
+
+function initFocusCharts(){
+  if(chartsInit.focus)return;chartsInit.focus=true;
+  new Chart(document.getElementById('chart-focus'),{
+    type:'bar',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Today'],
+      datasets:[{data:[4.5,5.2,3.8,6.0,5.1,2.0,3.3],
+        backgroundColor:(ctx)=>ctx.dataIndex===6?'rgba(0,210,255,0.4)':'rgba(0,210,255,0.15)',
+        borderColor:(ctx)=>ctx.dataIndex===6?'#00d2ff':'rgba(0,210,255,0.4)',
+        borderWidth:1.5,borderRadius:7,borderSkipped:false}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false},tooltip:TIP},
+      scales:{x:{grid:GRID,ticks:TICK},y:{grid:GRID,ticks:{...TICK,callback:v=>v+'h'},min:0,max:8}}}
+  });
+}
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+
+  // Lazy init charts & data
+  if(name==='dashboard'){renderActivities();initDashboardCharts();renderHeatmaps()}
+  if(name==='analytics'){initAnalyticsCharts()}
+  if(name==='habits'){renderHabits();renderHeatmaps()}
+  if(name==='goals'){renderGoals();initGoalChart()}
+  if(name==='finance'){renderTransactions();initFinanceCharts()}
+  if(name==='study'){renderSubjects();initStudyCharts()}
+  if(name==='calendar'){renderCalendar()}
+  if(name==='briefing'){setTimeout(animateWeightBars,300)}
+  if(name==='focus'){initFocusCharts()}
+  if(name==='feed'){renderFeed()}
+}
+
+/* ══════════════════════════════════
+   WEIGHT BAR ANIMATION
+══════════════════════════════════ */
+function animateWeightBars(){
+  document.querySelectorAll('.wb-fill').forEach(b=>{
+    b.style.width='0%';
+    setTimeout(()=>{b.style.width=b.dataset.w+'%'},100);
+  });
+}
+
+/* ══════════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════════ */
+function toggleNotif(){
+  document.getElementById('notif-panel').classList.toggle('show');
+}
+
+/* ══════════════════════════════════
+   AI COPILOT
+══════════════════════════════════ */
+const RESPONSES=[
+  'Based on your current trajectory, I recommend starting with your Rust study session — it has the lowest goal velocity right now.',
+  'Your energy peak is between 9–12am. Perfect for deep work. I\'ve noticed you do 40% better on coding tasks in this window.',
+  'You\'re 81% toward your savings goal. At current rate, you\'ll hit ₹5L 3 weeks early. 🎉',
+  'Your habit completion rate dropped 12% this week. Try habit stacking — attach new habits to existing triggers.',
+  'Burnout risk is low (12%). Good recovery scores. Keep the gym habit and you\'ll see energy boost by week\'s end.',
+];
+let rIdx=0;
+
+function toggleCopilot(){
+  const chat=document.getElementById('copilot-chat');
+  chat.classList.toggle('show');
+}
+
+function sendChat(){
+  const inp=document.getElementById('cc-input');
+  const msgs=document.getElementById('cc-messages');
+  if(!inp.value.trim())return;
+  msgs.innerHTML+=`<div class="cc-msg user">${inp.value}</div>`;
+  const r=RESPONSES[rIdx%RESPONSES.length];rIdx++;
+  setTimeout(()=>{msgs.innerHTML+=`<div class="cc-msg ai">${r}</div>`;msgs.scrollTop=999999;},600);
+  inp.value='';msgs.scrollTop=999999;
+}
+
+function handleChat(e){if(e.key==='Enter')sendChat()}
+
+/* ══════════════════════════════════
+   FOCUS TIMER
+══════════════════════════════════ */
+let focusInterval=null,focusSec=25*60,focusRunning=false;
+function toggleFocusTimer(){
+  const btn=document.querySelector('.focus-btn.primary');
+  if(focusRunning){
+    clearInterval(focusInterval);focusRunning=false;btn.textContent='▶ Resume Session';
+  }else{
+    focusRunning=true;btn.textContent='⏸ Pause';
+    focusInterval=setInterval(()=>{
+      if(focusSec>0){
+        focusSec--;
+        const m=Math.floor(focusSec/60),s=focusSec%60;
+        document.getElementById('focus-timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        document.getElementById('focus-progress').style.width=((25*60-focusSec)/(25*60)*100)+'%';
+      }else{clearInterval(focusInterval);focusRunning=false;btn.textContent='▶ Start Session';alert('Session complete! 🎉 +100 XP')}
+    },1000);
+  }
+}
+function resetFocus(){
+  clearInterval(focusInterval);focusRunning=false;focusSec=25*60;
+  document.getElementById('focus-timer').textContent='25:00';
+  document.getElementById('focus-progress').style.width='0%';
+  document.querySelector('.focus-btn.primary').textContent='▶ Start Session';
+}
+
+/* Pomodoro (Study page) */
+let pomoSec=25*60,pomoRunning=false,pomoInterval=null;
+function togglePomo(){
+  if(pomoRunning){
+    clearInterval(pomoInterval);pomoRunning=false;
+  }else{
+    pomoRunning=true;
+    pomoInterval=setInterval(()=>{
+      if(pomoSec>0){
+        pomoSec--;
+        const m=Math.floor(pomoSec/60),s=pomoSec%60;
+        const d=document.getElementById('pomo-display');
+        if(d)d.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      }else{clearInterval(pomoInterval);pomoRunning=false;}
+    },1000);
+  }
+}
+
+/* ══════════════════════════════════
+   CHART TABS
+══════════════════════════════════ */
+document.querySelectorAll('.ctab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    btn.closest('.chart-tabs').querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* ══════════════════════════════════
+   INIT ON LOAD
+══════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderActivities();
+  initDashboardCharts();
+  renderHeatmaps();
+  // Animate score bar fills on load
+  setTimeout(()=>{
+    document.querySelectorAll('.lsm-fill').forEach(f=>{const w=f.style.width;f.style.width='0';setTimeout(()=>f.style.width=w,100)});
+  },300);
+});
+
+/* Close notif on outside click */
+document.addEventListener('click',e=>{
+  const panel=document.getElementById('notif-panel');
+  if(panel.classList.contains('show')&&!panel.contains(e.target)&&!e.target.closest('.tb-btn')){
+    panel.classList.remove('show');
   }
 });
 </script>

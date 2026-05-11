@@ -1,0 +1,1 @@
+web: gunicorn lifeos_ai.wsgi

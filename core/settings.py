@@ -41,14 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'corsheaders',
-    'apps.accounts',
-    'apps.finance',
-    'apps.habits',
-    'apps.goals',
-    'apps.analytics_app',
+     'apps.analytics_app.apps.AnalyticsAppConfig',
+    'apps.accounts.apps.AccountsConfig',
+    'apps.habits.apps.HabitsConfig',
+    'apps.goals.apps.GoalsConfig',
+    'apps.finance.apps.FinanceConfig',
     
 ]
 MIDDLEWARE = [

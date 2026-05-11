@@ -23,3 +23,7 @@ def log_transaction_activity(
                 'category': instance.category.name,
             }
         )
+@receiver(post_save, sender=Transaction)
+def transaction_saved(sender, instance, created, **kwargs):
+    if created:
+        print(f"New transaction added: {instance.amount}")
