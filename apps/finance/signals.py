@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from .models import Transaction
-from services.recommendation_engine import log_user_activity
+from services.activity_logger import log_event as log_user_activity
 
 
 @receiver(post_save, sender=Transaction)

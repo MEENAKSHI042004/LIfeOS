@@ -1,38 +1,31 @@
-from typing import Any
-
-from apps.accounts.models import UserActivity
 from apps.accounts.models import User
-from django.contrib.auth import get_user_model
 
 
-def log_user_activity(
-    user: User,
-    event_type: str,
-    metadata: dict[str, Any]
-) -> None:
+def generate_daily_recommendation(user: User) -> str:
+    from services.productivity_engine import calculate_overall_score
+    scores = calculate_overall_score(user)
 
-    UserActivity.objects.create(
-        user=user,
-        event_type=event_type,
-        metadata=metadata
+    habit = scores["habit_score"]
+    finance = scores["finance_score"]
+    goal = scores["goal_score"]
+
+    weakest = min(
+        [("habit", habit), ("finance", finance), ("goal", goal)],
+        key=lambda x: x[1]
     )
-    from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
-
-def generate_daily_recommendation(user: User) -> dict:
-    """
-    Rule-based AI recommendation engine (MVP version)
-    """
-
-    return {
-        "user_id": user.id,
-        "message": "Focus on completing your habits and reduce unnecessary spending today.",
-        "insights": [
-            "Track your morning routine consistency",
-            "Avoid impulsive transactions",
-            "Maintain daily streak momentum"
-        ],
-        "priority": "medium"
+    tips = {
+        "habit": f"Your habit score is {habit} — focus on completing at least 3 habits before noon today to build momentum.",
+        "finance": f"Your finance score is {finance} — review your recent transactions and avoid impulsive spending today.",
+        "goal": f"Your goal score is {goal} — spend 30 minutes today making progress on your most important goal.",
     }
+
+    overall = scores["overall_score"]
+    if overall >= 80:
+        opening = "Great work! You're performing well across all areas."
+    elif overall >= 60:
+        opening = "You're making solid progress. Keep pushing."
+    else:
+        opening = "Let's turn things around today — small consistent actions add up."
+
+    return f"{opening} {tips[weakest[0]]}"
